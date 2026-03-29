@@ -1,38 +1,127 @@
-.App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+/* ═══════════════════════════════════════════════════════════════════════
+   App Shell — Top Nav & Layout
+   ═══════════════════════════════════════════════════════════════════════ */
+.app-shell {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Top Navigation ────────────────────────────────────────────────── */
+.top-nav {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  justify-content: space-between;
+  padding: 0 24px;
+  height: 64px;
+  background: var(--clr-indigo);
+  /* Deep Indigo per request */
+  box-shadow: 0 4px 12px rgba(45, 19, 80, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  color: #ffffff;
+  /* Ensure contrast on Indigo */
 }
 
-.App-link {
-  color: #61dafb;
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.brand-icon {
+  font-size: 1.6rem;
+}
+
+.brand-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  color: #ffffff;
+  /* No gradient, just clean white for contrast */
+}
+
+.nav-links {
+  display: flex;
+  gap: 6px;
+}
+
+.nav-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: .875rem;
+  color: rgba(255, 255, 255, 0.75);
+  /* Soft white */
+  transition: all .25s var(--ease-out);
+  border: 1px solid transparent;
+}
+
+.nav-pill:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-pill.active {
+  color: var(--clr-plum);
+  background: var(--clr-pearl);
+  /* Active link is Pearl off-white */
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: var(--shadow-sm);
+}
+
+.nav-icon {
+  font-size: 1rem;
+}
+
+.nav-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  font-size: .85rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.user-badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.logout-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: .75rem;
+  transition: all .2s;
+}
+
+.logout-btn:hover {
+  background: var(--clr-danger);
+  color: #fff;
+  border-color: var(--clr-danger-light);
+}
+
+/* ── Main Content ──────────────────────────────────────────────────── */
+.main-content {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
 }

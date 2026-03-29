@@ -1,49 +1,57 @@
 const express = require('express');
+const cors = require('cors');
 const { Pool } = require('pg');
-const dotenv = require('dotenv').config();
+const dotenv = require('dotenv');
 
-// Create express app
+// Load .env from the server directory
+dotenv.config({ path: __dirname + '/.env' });
+
+// ── Express setup ──────────────────────────────────────────────────────
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3001;
 
-// Create pool
+app.use(cors());
+app.use(express.json());
+
+// ── PostgreSQL pool ────────────────────────────────────────────────────
 const pool = new Pool({
-    user: process.env.PSQL_USER,
-    host: process.env.PSQL_HOST,
-    database: process.env.PSQL_DATABASE,
-    password: process.env.PSQL_PASSWORD,
-    port: process.env.PSQL_PORT,
-    ssl: {rejectUnauthorized: false}
+  user: process.env.PSQL_USER,
+  host: process.env.PSQL_HOST,
+  database: process.env.PSQL_DATABASE,
+  password: process.env.PSQL_PASSWORD,
+  port: process.env.PSQL_PORT,
+  ssl: { rejectUnauthorized: false },
 });
 
-process.on('SIGINT', function() {
-    pool.end();
-    console.log('Application successfully shutdown');
-    process.exit(0);
-});
-	 	 	 	
-app.set("view engine", "ejs");
+// Make pool accessible to route files
+app.locals.pool = pool;
 
-app.get('/', (req, res) => {
-    const data = {name: 'Mason'};
-    res.render('index', data);
+// ── Routes ─────────────────────────────────────────────────────────────
+const authRoutes = require('./routes/auth');
+const menuRoutes = require('./routes/menu');
+const orderRoutes = require('./routes/orders');
+
+app.use('/api/auth', authRoutes);
+app.use('/api/menu', menuRoutes);
+app.use('/api/orders', orderRoutes);
+
+// Health-check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ status: 'ok', time: result.rows[0].now });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
 });
 
-	 	 	 	
-app.get('/user', (req, res) => {
-    teammembers = []
-    pool
-        .query('SELECT * FROM teammembers;')
-        .then(query_res => {
-            for (let i = 0; i < query_res.rowCount; i++){
-                teammembers.push(query_res.rows[i]);
-            }
-            const data = {teammembers: teammembers};
-            console.log(teammembers);
-            res.render('user', data);
-        });
+// ── Graceful shutdown ──────────────────────────────────────────────────
+process.on('SIGINT', () => {
+  pool.end();
+  console.log('Application successfully shut down');
+  process.exit(0);
 });
 
 app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
+  console.log(`Boba POS API listening at http://localhost:${port}`);
 });
