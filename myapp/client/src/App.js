@@ -84,19 +84,48 @@ function App() {
               <div className="pinBox-content" onClick={(e) => e.stopPropagation()}>
                 <h2>Manager Verification</h2>
                 <p>Enter manager PIN to logout:</p>
-                <input
-                  type="password"
-                  placeholder="Enter PIN"
-                  value={pinInput}
-                  onChange={(e) => setPinInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && verifyManagerPin()}
-                  autoFocus
-                />
-                {pinError && <p className="pin-error">{pinError}</p>}
-                <div className="pinBox-buttons">
-                  <button className="btn-cancel" onClick={() => setShowPinBox(false)}>Cancel</button>
-                  <button className="btn-verify" onClick={verifyManagerPin}>Verify</button>
+                
+                <div className="pinBox-display">
+                  {pinInput ? '•'.repeat(pinInput.length) : <span className="pinBox-placeholder">Enter PIN</span>}
                 </div>
+
+                <div className="pinBox-pad">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      className="pinBox-btn"
+                      onClick={() => setPinInput((prev) => prev.length < 8 ? prev + num : prev)}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="pinBox-btn action-btn backspace"
+                    onClick={() => setPinInput((prev) => prev.slice(0, -1))}
+                  >
+                    ⌫
+                  </button>
+                  <button
+                    type="button"
+                    className="pinBox-btn"
+                    onClick={() => setPinInput((prev) => prev.length < 8 ? prev + '0' : prev)}
+                  >
+                    0
+                  </button>
+                  <button
+                    type="button"
+                    className="pinBox-btn action-btn enter"
+                    onClick={verifyManagerPin}
+                    disabled={pinInput.length === 0}
+                  >
+                    Enter
+                  </button>
+                </div>
+
+                {pinError && <p className="pin-error">{pinError}</p>}
+                <button className="btn-cancel" onClick={() => setShowPinBox(false)}>Cancel</button>
               </div>
             </div>
           )}

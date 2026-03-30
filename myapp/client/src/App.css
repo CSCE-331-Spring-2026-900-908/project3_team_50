@@ -224,6 +224,63 @@
   box-shadow: var(--shadow-glow);
 }
 
+/* PIN Box Display Pad  */
+.pinBox-display {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.3em;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pinBox-placeholder {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.pinBox-pad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pinBox-btn {
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 1.2rem;
+  transition: all .2s var(--ease-out);
+  cursor: pointer;
+}
+
+
+.pinBox-btn:active {
+  transform: translateY(0);
+}
+
+.pinBox-btn.action-btn {
+  background: var(--clr-primary);
+  color: #fff;
+  border-color: var(--clr-primary-light);
+  font-size: 1rem;
+  box-shadow: var(--shadow-glow);
+}
+
+
 /* ── Main Content ──────────────────────────────────────────────────── */
 .main-content {
   flex: 1;
