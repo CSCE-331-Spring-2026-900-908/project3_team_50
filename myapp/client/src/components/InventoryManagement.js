@@ -194,16 +194,17 @@ export default function InventoryManagement() {
               <th>Min Stock</th>
               <th>Unit</th>
               <th>Unit Cost</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="table-loading">Loading...</td>
+                <td colSpan="8" className="table-loading">Loading...</td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan="7" className="table-loading">No inventory items found.</td>
+                <td colSpan="8" className="table-loading">No inventory items found.</td>
               </tr>
             ) : (
               items.map((item) => (
@@ -224,6 +225,9 @@ export default function InventoryManagement() {
                   <td>{item.min_stock}</td>
                   <td>{item.unit}</td>
                   <td>${Number(item.unit_cost ?? 0).toFixed(2)}</td>
+                  <td>
+                    {Number(item.current_stock) < Number(item.min_stock) ? 'Low Stock' : 'OK'}
+                  </td>
                 </tr>
               ))
             )}
