@@ -172,6 +172,28 @@ export default function InventoryManagement() {
     }
   };
 
+  const handleRestock = async () => {
+    if (selectedId === null) {
+      flashError('Please select an item to restock');
+      return;
+    }
+
+    const item = items.find((i) => i.inventory_id === selectedId);
+    if (!item) return;
+
+    try {
+      await axios.put(`${API}/inventory/items/${selectedId}`, {
+        ...item,
+        current_stock: item.max_stock,
+      });
+
+      flashSuccess('Item restocked to max!');
+      loadItems();
+    } catch (err) {
+      flashError(err.response?.data?.error || err.message);
+    }
+  };
+
   return (
     <div className="inventory-mgmt">
       <div className="mgmt-header">
@@ -240,6 +262,9 @@ export default function InventoryManagement() {
         <button className="action-btn add" onClick={openAdd}>+ Add New Item</button>
         <button className="action-btn edit" onClick={openEdit}>Update Selected</button>
         <button className="action-btn delete" onClick={handleDelete}>Delete Selected</button>
+        <button className="action-btn" onClick={handleRestock}>
+          Restock Selected
+        </button>
       </div>
 
       {modal && (
