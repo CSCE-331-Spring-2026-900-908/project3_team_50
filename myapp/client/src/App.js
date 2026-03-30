@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
 import Login from './components/Login';
+import Kiosk from './components/Kiosk';
 import './App.css';
 
 function App() {
@@ -17,8 +18,27 @@ function App() {
     return <Login onLogin={setUser} />;
   }
 
+  const isCashier = user.role === 'Cashier';
   const isManager = user.role === 'Manager';
+  const isCustomer = user.role === 'Customer';
 
+  // ── Customer Kiosk (no nav bar) ────────────────────────────────────
+  if (isCustomer) {
+    return (
+      <Router>
+        <div className="app-shell">
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Kiosk />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+        </div>
+      </Router>
+    );
+  }
+
+  // ── Cashier & Manager Views (with nav bar) ─────────────────────────
   return (
     <Router>
       <div className="app-shell">

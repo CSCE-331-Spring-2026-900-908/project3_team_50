@@ -28,7 +28,7 @@ router.post('/login', async (req, res) => {
         user: {
           id: user.employee_id,
           name: user.name,
-          role: user.role, // "Cashier" or "Manager"
+          role: user.role, // "Cashier" or "Manager or Customer"
         },
       });
     } else {
