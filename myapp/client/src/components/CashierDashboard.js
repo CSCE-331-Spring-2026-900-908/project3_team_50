@@ -97,6 +97,8 @@ export default function CashierDashboard() {
     // Reset currentItemIndex if it's affected by the removal
     if (currentItemIndex === index) {
       setCurrentItemIndex(null);
+      // Go back to menu if we were editing this item
+      setView('MENU');
     } else if (currentItemIndex !== null && currentItemIndex > index) {
       setCurrentItemIndex(currentItemIndex - 1);
     }

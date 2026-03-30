@@ -106,6 +106,8 @@ export default function Kiosk() {
     // Reset currentItemIndex if it's affected by the removal
     if (currentItemIndex === index) {
       setCurrentItemIndex(null);
+      // Go back to items if we were editing this item
+      setView('ITEMS');
     } else if (currentItemIndex !== null && currentItemIndex > index) {
       setCurrentItemIndex(currentItemIndex - 1);
     }
