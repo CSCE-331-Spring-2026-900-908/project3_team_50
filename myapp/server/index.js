@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const dotenv = require('dotenv');
 
 // Load .env from the server directory
-dotenv.config({path: __dirname + '/.env'});
+dotenv.config();
 
 // ── Express setup ──────────────────────────────────────────────────────
 const app = express();
