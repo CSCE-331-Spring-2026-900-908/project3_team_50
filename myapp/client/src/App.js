@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react
 import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
+import InventoryManagement from './components/InventoryManagement';
 import ManagerDashboard from './components/ManagerDashboard';
 import Login from './components/Login';
 import Kiosk from './components/Kiosk';
@@ -205,6 +206,10 @@ function App() {
             <Route 
               path="/menu-management" 
               element={isManager ? <MenuManagement /> : <Navigate to="/" replace />} 
+            />
+            <Route
+              path="/inventory-management"
+              element={isManager ? <InventoryManagement /> : <Navigate to="/" replace />}
             />
           </Routes>
         </main>
