@@ -260,9 +260,27 @@ export default function InventoryManagement() {
       <div className="mgmt-actions">
         <button className="action-btn refresh" onClick={loadItems}>Refresh</button>
         <button className="action-btn add" onClick={openAdd}>+ Add New Item</button>
-        <button className="action-btn edit" onClick={openEdit}>Update Selected</button>
-        <button className="action-btn delete" onClick={handleDelete}>Delete Selected</button>
-        <button className="action-btn" onClick={handleRestock}>
+        <button
+          className="action-btn edit"
+          onClick={openEdit}
+          disabled={selectedId === null}
+        >
+          Update Selected
+        </button>
+
+        <button
+          className="action-btn delete"
+          onClick={handleDelete}
+          disabled={selectedId === null}
+        >
+          Delete Selected
+        </button>
+
+        <button
+          className="action-btn"
+          onClick={handleRestock}
+          disabled={selectedId === null}
+        >
           Restock Selected
         </button>
       </div>
