@@ -1,16 +1,51 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
 import Login from './components/Login';
 import Kiosk from './components/Kiosk';
 import './App.css';
 
+const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+
 function App() {
   const [user, setUser] = useState(null);
+  const [showPinBox, setShowPinBox] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
 
   const handleLogout = () => {
     setUser(null);
+    setPinInput('');
+    setPinError('');
+    setShowPinBox(false);
+  };
+
+  const handleCustomerLogout = () => {
+    setShowPinBox(true);
+    setPinInput('');
+    setPinError('');
+  };
+
+  const verifyManagerPin = async () => {
+    if (!pinInput) {
+      setPinError('PIN is required');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`${API}/auth/login`, { pin: pinInput });
+      const userData = response.data.user;
+
+      if (userData.role === 'Manager') {
+        handleLogout();
+      } else {
+        setPinError('Invalid credentials. Manager PIN required.');
+      }
+    } catch (err) {
+      setPinError('Invalid PIN');
+    }
   };
 
   // If not logged in, show only the Login screen
@@ -18,15 +53,55 @@ function App() {
     return <Login onLogin={setUser} />;
   }
 
-  const isCashier = user.role === 'Cashier';
+  //const isCashier = user.role === 'Cashier'; not needed for now
   const isManager = user.role === 'Manager';
   const isCustomer = user.role === 'Customer';
 
-  // ── Customer Kiosk (no nav bar) ────────────────────────────────────
+  //Customer Kiosk (with simplified nav)
   if (isCustomer) {
     return (
       <Router>
         <div className="app-shell">
+          {/* Kiosk Top Nav*/}
+          <nav className="top-nav">
+            <div className="nav-brand">
+              <span className="brand-icon">🧋</span>
+              <span className="brand-text">Boba Shop 50</span>
+            </div>
+
+            <div className="nav-welcome">
+              <span>Welcome Valued Customer</span>
+            </div>
+
+            <div className="nav-user">
+              <button className="logout-btn" onClick={handleCustomerLogout}>Logout</button>
+            </div>
+          </nav>
+
+          {/* PIN for costomer logout */}
+          {showPinBox && (
+            <div className="pinBox-overlay" onClick={() => setShowPinBox(false)}>
+              <div className="pinBox-content" onClick={(e) => e.stopPropagation()}>
+                <h2>Manager Verification</h2>
+                <p>Enter manager PIN to logout:</p>
+                <input
+                  type="password"
+                  placeholder="Enter PIN"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && verifyManagerPin()}
+                  autoFocus
+                />
+                {pinError && <p className="pin-error">{pinError}</p>}
+                <div className="pinBox-buttons">
+                  <button className="btn-cancel" onClick={() => setShowPinBox(false)}>Cancel</button>
+                  <button className="btn-verify" onClick={verifyManagerPin}>Verify</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          
           <main className="main-content">
             <Routes>
               <Route path="/" element={<Kiosk />} />
@@ -38,7 +113,7 @@ function App() {
     );
   }
 
-  // ── Cashier & Manager Views (with nav bar) ─────────────────────────
+  //Cashier & Manager Views (with nav bar)
   return (
     <Router>
       <div className="app-shell">

@@ -119,6 +119,111 @@
   border-color: var(--clr-danger-light);
 }
 
+/* Nav Welcome (Customer Kiosk)*/
+.nav-welcome {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+/* PIN box*/
+.pinBox-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.pinBox-content {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pinBox-content h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+}
+
+.pinBox-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: .95rem;
+}
+
+.pinBox-content input {
+  padding: 12px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: .95rem;
+  font-family: inherit;
+  transition: all .2s;
+}
+
+.pinBox-content input:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.pin-error {
+  margin: 0;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--clr-danger);
+  font-size: .85rem;
+  font-weight: 500;
+}
+
+.pinBox-buttons {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.btn-cancel {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: .9rem;
+  transition: all .2s;
+}
+
+.btn-verify {
+  flex: 1;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: var(--clr-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: .9rem;
+  transition: all .2s;
+  box-shadow: var(--shadow-glow);
+}
+
 /* ── Main Content ──────────────────────────────────────────────────── */
 .main-content {
   flex: 1;

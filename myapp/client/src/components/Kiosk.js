@@ -5,10 +5,10 @@ import './Kiosk.css';
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 /* ═══════════════════════════════════════════════════════════════════════
-   Cashier Dashboard — POS view
-   Translates CashierDashboard.java to React
+   Kiosk — Customer ordering view
+   Mirrors CashierDashboard but for customer self-service
    ═══════════════════════════════════════════════════════════════════════ */
-export default function CashierDashboard() {
+export default function Kiosk() {
   // ── State ──────────────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
   const [activeCategory, setActiveCategory] = useState(null);
