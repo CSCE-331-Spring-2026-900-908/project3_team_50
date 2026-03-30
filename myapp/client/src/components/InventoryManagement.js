@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './InventoryManagement.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -130,6 +131,9 @@ export default function InventoryManagement() {
     <div className="inventory-mgmt">
       <div className="mgmt-header">
         <h1>Inventory Management</h1>
+        <Link className="action-btn back-link-btn" to="/manager-dashboard">
+          ← Back to Dashboard
+        </Link>
         {error && <div className="toast toast-error">{error}</div>}
         {success && <div className="toast toast-success">{success}</div>}
       </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import './MenuManagement.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -139,6 +140,9 @@ export default function MenuManagement() {
     <div className="menu-mgmt">
       <div className="mgmt-header">
         <h1>Menu Items Management</h1>
+        <Link className="action-btn back-link-btn" to="/manager-dashboard">
+          ← Back to Dashboard
+        </Link>
 
         {/* Toasts */}
         {error && <div className="toast toast-error">{error}</div>}
