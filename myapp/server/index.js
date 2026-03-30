@@ -30,10 +30,12 @@ app.locals.pool = pool;
 const authRoutes = require('./routes/auth');
 const menuRoutes = require('./routes/menu');
 const orderRoutes = require('./routes/orders');
+const inventoryRoutes = require('./routes/inventory');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Health-check endpoint
 app.get('/api/health', async (req, res) => {
