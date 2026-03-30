@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react
 import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
+import ManagerDashboard from './components/ManagerDashboard';
 import Login from './components/Login';
 import Kiosk from './components/Kiosk';
 import './App.css';
@@ -154,23 +155,25 @@ function App() {
           </div>
 
           <div className="nav-links">
-            <NavLink
-              to="/"
-              end
-              className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}
-            >
-              <span className="nav-icon">💳</span>
-              Cashier
-            </NavLink>
+            {!isManager && (
+              <NavLink
+                to="/"
+                end
+                className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}
+              >
+                <span className="nav-icon">💳</span>
+                Cashier
+              </NavLink>
+            )}
             
             {/* Managers only tab */}
             {isManager && (
               <NavLink
-                to="/menu-management"
+                to="/manager-dashboard"
                 className={({ isActive }) => `nav-pill ${isActive ? 'active' : ''}`}
               >
                 <span className="nav-icon">📋</span>
-                Menu Management
+                Manager Dashboard
               </NavLink>
             )}
           </div>
@@ -185,9 +188,20 @@ function App() {
         {/* ── Page Content ────────────────────────────────────────── */}
         <main className="main-content">
           <Routes>
-            <Route path="/" element={<CashierDashboard cashierName={user.name} />} />
+            <Route
+              path="/"
+              element={
+                isManager
+                  ? <Navigate to="/manager-dashboard" replace />
+                  : <CashierDashboard cashierName={user.name} />
+              }
+            />
             
             {/* Protected Route */}
+            <Route
+              path="/manager-dashboard"
+              element={isManager ? <ManagerDashboard /> : <Navigate to="/" replace />}
+            />
             <Route 
               path="/menu-management" 
               element={isManager ? <MenuManagement /> : <Navigate to="/" replace />} 
