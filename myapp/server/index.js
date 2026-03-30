@@ -4,7 +4,7 @@ const { Pool } = require('pg');
 const dotenv = require('dotenv');
 
 // Load .env from the server directory
-dotenv.config({ path: __dirname + '/.env' });
+dotenv.config();
 
 // ── Express setup ──────────────────────────────────────────────────────
 const app = express();
@@ -52,6 +52,6 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-app.listen(port, () => {
-  console.log(`Boba POS API listening at http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Boba POS API is live and listening on port ${port}`);
 });
