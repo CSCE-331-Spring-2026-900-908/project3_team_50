@@ -17,6 +17,7 @@ export default function InventoryManagement() {
     max_stock: '',
     min_stock: '',
     unit: '',
+    unit_cost: '',
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -28,6 +29,7 @@ export default function InventoryManagement() {
       setItems(res.data);
     } catch (err) {
       console.error(err);
+      flashError('Failed to load inventory items');
     } finally {
       setLoading(false);
     }
@@ -54,6 +56,7 @@ export default function InventoryManagement() {
       max_stock: '',
       min_stock: '',
       unit: '',
+      unit_cost: '',
     });
     setError('');
     setSuccess('');
@@ -74,6 +77,7 @@ export default function InventoryManagement() {
       max_stock: String(item.max_stock ?? ''),
       min_stock: String(item.min_stock ?? ''),
       unit: item.unit ?? '',
+      unit_cost: String(item.unit_cost ?? ''),
     });
     setError('');
     setSuccess('');
@@ -81,14 +85,53 @@ export default function InventoryManagement() {
   };
 
   const payloadFromForm = () => ({
-    name: form.name,
+    name: form.name.trim(),
     current_stock: parseFloat(form.current_stock),
     max_stock: parseFloat(form.max_stock),
     min_stock: parseFloat(form.min_stock),
-    unit: form.unit,
+    unit: form.unit.trim(),
+    unit_cost: parseFloat(form.unit_cost),
   });
 
+  const validateForm = () => {
+    const payload = payloadFromForm();
+
+    if (!payload.name || !payload.unit) {
+      flashError('Name and unit are required');
+      return false;
+    }
+
+    if (
+      Number.isNaN(payload.current_stock) ||
+      Number.isNaN(payload.max_stock) ||
+      Number.isNaN(payload.min_stock) ||
+      Number.isNaN(payload.unit_cost)
+    ) {
+      flashError('Please enter valid numeric values');
+      return false;
+    }
+
+    if (
+      payload.current_stock < 0 ||
+      payload.max_stock < 0 ||
+      payload.min_stock < 0 ||
+      payload.unit_cost < 0
+    ) {
+      flashError('Stock values and unit cost cannot be negative');
+      return false;
+    }
+
+    if (payload.min_stock > payload.max_stock) {
+      flashError('Minimum stock cannot be greater than maximum stock');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleAdd = async () => {
+    if (!validateForm()) return;
+
     try {
       await axios.post(`${API}/inventory/items`, payloadFromForm());
       setModal(null);
@@ -100,6 +143,8 @@ export default function InventoryManagement() {
   };
 
   const handleUpdate = async () => {
+    if (!validateForm()) return;
+
     try {
       await axios.put(`${API}/inventory/items/${selectedId}`, payloadFromForm());
       setModal(null);
@@ -148,22 +193,26 @@ export default function InventoryManagement() {
               <th>Max Stock</th>
               <th>Min Stock</th>
               <th>Unit</th>
+              <th>Unit Cost</th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="6" className="table-loading">Loading...</td>
+                <td colSpan="7" className="table-loading">Loading...</td>
               </tr>
             ) : items.length === 0 ? (
               <tr>
-                <td colSpan="6" className="table-loading">No inventory items found.</td>
+                <td colSpan="7" className="table-loading">No inventory items found.</td>
               </tr>
             ) : (
               items.map((item) => (
                 <tr
                   key={item.inventory_id}
-                  className={selectedId === item.inventory_id ? 'selected' : ''}
+                  className={[
+                    selectedId === item.inventory_id ? 'selected' : '',
+                    Number(item.current_stock) < Number(item.min_stock) ? 'low-stock-row' : '',
+                  ].join(' ').trim()}
                   onClick={() =>
                     setSelectedId(selectedId === item.inventory_id ? null : item.inventory_id)
                   }
@@ -174,6 +223,7 @@ export default function InventoryManagement() {
                   <td>{item.max_stock}</td>
                   <td>{item.min_stock}</td>
                   <td>{item.unit}</td>
+                  <td>${Number(item.unit_cost ?? 0).toFixed(2)}</td>
                 </tr>
               ))
             )}
@@ -238,6 +288,16 @@ export default function InventoryManagement() {
                 type="text"
                 value={form.unit}
                 onChange={(e) => setForm({ ...form, unit: e.target.value })}
+              />
+            </label>
+
+            <label>
+              Unit Cost
+              <input
+                type="number"
+                step="0.01"
+                value={form.unit_cost}
+                onChange={(e) => setForm({ ...form, unit_cost: e.target.value })}
               />
             </label>
 

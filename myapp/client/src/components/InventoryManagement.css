@@ -13,3 +13,7 @@
   display: inline-flex;
   align-items: center;
 }
+
+.low-stock-row {
+  background-color: rgba(255, 99, 132, .12);
+}

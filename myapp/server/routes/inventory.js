@@ -6,7 +6,7 @@ router.get('/items', async (req, res) => {
   const pool = req.app.locals.pool;
   try {
     const result = await pool.query(
-      `SELECT inventory_id, name, current_stock, max_stock, min_stock, unit
+      `SELECT inventory_id, name, current_stock, max_stock, min_stock, unit, unit_cost
        FROM inventory
        ORDER BY inventory_id`
     );
@@ -20,7 +20,7 @@ router.get('/items', async (req, res) => {
 // POST /api/inventory/items
 router.post('/items', async (req, res) => {
   const pool = req.app.locals.pool;
-  const { name, current_stock, max_stock, min_stock, unit } = req.body;
+  const { name, current_stock, max_stock, min_stock, unit, unit_cost } = req.body;
   const client = await pool.connect();
 
   try {
@@ -31,8 +31,8 @@ router.post('/items', async (req, res) => {
     const nextId = idResult.rows[0].next_id;
 
     await client.query(
-      `INSERT INTO inventory (inventory_id, name, current_stock, max_stock, min_stock, unit)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
+      `INSERT INTO inventory (inventory_id, name, current_stock, max_stock, min_stock, unit, unit_cost)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [nextId, name, current_stock, max_stock, min_stock, unit]
     );
 
@@ -51,14 +51,14 @@ router.post('/items', async (req, res) => {
 router.put('/items/:id', async (req, res) => {
   const pool = req.app.locals.pool;
   const { id } = req.params;
-  const { name, current_stock, max_stock, min_stock, unit } = req.body;
+  const { name, current_stock, max_stock, min_stock, unit, unit_cost } = req.body;
 
   try {
     await pool.query(
       `UPDATE inventory
-       SET name = $1, current_stock = $2, max_stock = $3, min_stock = $4, unit = $5
-       WHERE inventory_id = $6`,
-      [name, current_stock, max_stock, min_stock, unit, id]
+       SET name = $1, current_stock = $2, max_stock = $3, min_stock = $4, unit = $5, unit_cost = $6
+       WHERE inventory_id = $7`,
+      [name, current_stock, max_stock, min_stock, unit, unit_cost, id]
     );
     res.json({ success: true });
   } catch (err) {
