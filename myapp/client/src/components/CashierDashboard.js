@@ -94,6 +94,12 @@ export default function CashierDashboard() {
 
   const removeItem = (index) => {
     setOrderItems((prev) => prev.filter((_, i) => i !== index));
+    // Reset currentItemIndex if it's affected by the removal
+    if (currentItemIndex === index) {
+      setCurrentItemIndex(null);
+    } else if (currentItemIndex !== null && currentItemIndex > index) {
+      setCurrentItemIndex(currentItemIndex - 1);
+    }
   };
 
   const handleCheckout = async (customerName) => {
