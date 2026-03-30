@@ -19,8 +19,8 @@ export default function Kiosk() {
   const [orderItems, setOrderItems] = useState([]);
   const [currentItemIndex, setCurrentItemIndex] = useState(null);
 
-  // View state — "MENU" | "ADDONS" | "CHECKOUT"
-  const [view, setView] = useState('MENU');
+  // View state — "CATEGORIES" | "ITEMS" | "ADDONS" | "CHECKOUT"
+  const [view, setView] = useState('CATEGORIES');
   const [tip, setTip] = useState(0);
   const [customTipInput, setCustomTipInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -36,7 +36,6 @@ export default function Kiosk() {
   useEffect(() => {
     axios.get(`${API}/menu/categories`).then((r) => {
       setCategories(r.data);
-      if (r.data.length > 0) setActiveCategory(r.data[0]);
     });
     axios.get(`${API}/menu/boba`).then((r) => setBobaToppings(r.data));
   }, []);
@@ -53,6 +52,16 @@ export default function Kiosk() {
   }, [fetchItems]);
 
   // ── Handlers ───────────────────────────────────────────────────────
+  const handleCategoryClick = (category) => {
+    setActiveCategory(category);
+    setView('ITEMS');
+  };
+
+  const handleBackToCategories = () => {
+    setView('CATEGORIES');
+    setActiveCategory(null);
+  };
+
   const addItemToOrder = (item) => {
     const newItem = {
       baseItemId: item.item_id,
@@ -65,7 +74,7 @@ export default function Kiosk() {
       sweetness: 'Regular Sweet',
     };
     setOrderItems((prev) => [...prev, newItem]);
-    setCurrentItemIndex(orderItems.length); // index of newly pushed item
+    setCurrentItemIndex(orderItems.length);
     setView('ADDONS');
   };
 
@@ -113,7 +122,7 @@ export default function Kiosk() {
       // Reset
       setOrderItems([]);
       setTip(0);
-      setView('MENU');
+      setView('CATEGORIES');
       setSuccessMessage('Payment Successful!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
@@ -125,26 +134,36 @@ export default function Kiosk() {
 
   // ── Render ─────────────────────────────────────────────────────────
   return (
-    <div className="cashier-layout">
-      {/* ── LEFT: Menu / Addons / Checkout ─────────────────────────── */}
-      <div className="cashier-main">
-        {view === 'MENU' && (
-          <>
-            {/* Category pills */}
-            <div className="category-bar">
-              {categories.map((cat) => (
+    <div className="kiosk-layout">
+      {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
+      <div className="kiosk-main">
+        {view === 'CATEGORIES' && (
+          <div className="categories-view">
+            <h1 className="kiosk-title">Select a Category</h1>
+            <div className="categories-grid">
+              {categories.map((category) => (
                 <button
-                  key={cat}
-                  className={`cat-btn ${activeCategory === cat ? 'active' : ''}`}
-                  onClick={() => setActiveCategory(cat)}
+                  key={category}
+                  className="category-box"
+                  onClick={() => handleCategoryClick(category)}
                 >
-                  {cat}
+                  <div className="category-image">
+                    {getCategoryEmoji(category)}
+                  </div>
+                  <span className="category-name">{category}</span>
                 </button>
               ))}
             </div>
+          </div>
+        )}
 
-            {/* Item grid */}
-            <div className="item-grid">
+        {view === 'ITEMS' && activeCategory && (
+          <div className="items-view">
+            <button className="back-arrow" onClick={handleBackToCategories}>
+              ← Back
+            </button>
+            <h2 className="items-title">{activeCategory}</h2>
+            <div className="items-grid">
               {menuItems.map((item) => (
                 <button
                   key={item.item_id}
@@ -156,23 +175,31 @@ export default function Kiosk() {
                 </button>
               ))}
               {menuItems.length === 0 && (
-                <p className="empty-hint">Select a category above</p>
+                <p className="empty-hint">No items in this category</p>
               )}
             </div>
-          </>
+          </div>
         )}
 
         {view === 'ADDONS' && currentItemIndex !== null && (
-          <AddonsPanel
-            item={orderItems[currentItemIndex]}
-            bobaToppings={bobaToppings}
-            onSelectBoba={selectBoba}
-            onUpdateItem={updateCurrentItem}
-            onDone={() => {
+          <div className="addons-view">
+            <button className="back-arrow" onClick={() => {
               setCurrentItemIndex(null);
-              setView('MENU');
-            }}
-          />
+              setView('ITEMS');
+            }}>
+              ← Back
+            </button>
+            <AddonsPanel
+              item={orderItems[currentItemIndex]}
+              bobaToppings={bobaToppings}
+              onSelectBoba={selectBoba}
+              onUpdateItem={updateCurrentItem}
+              onDone={() => {
+                setCurrentItemIndex(null);
+                setView('ITEMS');
+              }}
+            />
+          </div>
         )}
 
         {view === 'CHECKOUT' && (
@@ -183,7 +210,7 @@ export default function Kiosk() {
             customTipInput={customTipInput}
             setCustomTipInput={setCustomTipInput}
             onPay={handleCheckout}
-            onBack={() => setView('MENU')}
+            onBack={() => setView('ITEMS')}
             isProcessing={isProcessing}
           />
         )}
@@ -252,6 +279,18 @@ export default function Kiosk() {
       </aside>
     </div>
   );
+}
+
+/* ─── Helper: Get emoji for category ───────────────────────────────── */
+function getCategoryEmoji(category) {
+  const emojiMap = {
+    'Slush': '🥤',
+    'Milk Tea': '🥛🧋',
+    'Fruit Tea': '🧃🧋',
+    'Boba': '🧋',
+    
+  };
+  return emojiMap[category] || '🧋';
 }
 
 /* ─── Addons Sub-Component ─────────────────────────────────────────── */
