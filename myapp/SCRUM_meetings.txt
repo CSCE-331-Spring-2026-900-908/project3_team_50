@@ -1,0 +1,141 @@
+
+3/25/2026 Meeting 1
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items: 
+    Initial Tasks for Sprint 1
+    Task Distribution
+
+Tasks Completed:
+    Task Description: Set up Render in lab and connected to Github
+        Assigned to: Everyone
+        Completed? (yes/no): Yes
+
+    Task Description: Identify Strengths
+        Assigned to: Everyone
+        Completed? (yes/no): Yes
+
+Before The Next Meeting
+Plans: 
+    Identify areas you think you would perform best at and what tasks you want to complete.
+    Look into the recommended tech stack for the project, choose between javascript/typescript
+
+Task Assignments:
+    Task Description: Analyze JavaScript and TypeScript
+    Assigned to: Britton
+
+Minutes: 
+    We want to look into the recommended frameworks suggested to us for the project, 
+    and due to their being some selection choosing the one we want to go with. From 
+    there we could have a good project blueprint and begin to start building. In the 
+    meantime while the techstack was being finalized think about the parts of the 
+    project that we would be most useful in.
+
+03/27/2026 Meeting 2
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items:
+    What we want to have completed for Sprint 1
+    Time to work on tasks and when we want certain elements done
+
+Updates:
+    Chose Javascript for frontend UI
+    Finalized tech stack to be used
+    Set up Node.JS and React for the project
+
+Tasks Completed:
+    Task Description: Choose between JavaScript and TypeScript
+        Assigned to: Britton
+        Completed? (yes/no): Yes
+    
+    Task Description: Look into Express and Node.JS
+        Assigned to: Michael    
+        Completed? (yes/no): Yes
+    
+Before The Next Meeting
+Plans:
+    Get a functional foundation of web version of project 2 working
+    Be able to host project on Render
+
+Task Assignments:
+    Task Description: Set up Render to host web project
+    Assigned to: Mason
+
+    Task Description: Cashier Dashboard
+    Assigned to: Britton
+
+    Task Description: Customer Kiosk View 
+    Assigned to: Mason
+
+    Task Description: Inventory Management System
+    Assigned to: Gavin
+    
+    Task Description: Manager Dashboard
+    Assigned to: Michael
+
+Minutes:
+    Figured that people converting what they were responsible for in project 2
+     made the most sense and would be more efficient, as we convert to a new 
+     language. Also now that we knew how to handle rendering after lab we 
+     would go with that to host the application. 
+
+3/29/2026 Meeting 3
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items:
+    Final updates for Sprint on what we need for the demonstration
+    Distributing tasks and coordinating how we want to work together
+
+Updates:
+    Got render to host from our main branch
+    Cashier Dashboard and Menu Management works 
+    Login for POS running
+    Customer Kiosk works and setting up customer login
+
+Tasks Completed:
+    Task Description: Set up Render to host web project
+        Assigned to: Mason
+        Completed? (yes/no): Yes
+
+    Task Description: Cashier Dashboard
+        Assigned to: Britton
+        Completed? (yes/no): Yes
+
+    Task Description: Customer Kiosk View
+        Assigned to: Mason
+        Completed? (yes/no): Yes    
+    
+    Task Description: Inventory Management System
+        Assigned to: Gavin
+        Completed? (yes/no): No
+
+    Task Description: Manager Dashboard
+        Assigned to: Michael
+        Completed? (yes/no): No 
+
+Plans:
+    Finish remaining views assigned
+    Look at places to polish and ways to improve from project 2 style
+
+Task Assignments:
+    Task Description: Inventory Management System
+    Assigned to: Gavin
+
+    Task Description: Manager Dashboard
+    Assigned to: Michael
+
+    Burn Chart Setup
+    Assigned to: Mason
+
+Minutes:
+    We need to wrap up out unfinshed parts of the first sprint. 
+    We may have been over ambisuous with the amount of work we 
+    wanted to get done, but we will have a good foundation for 
+    the project and a good idea of how to move forward. We will 
+    also have a burn chart set up to track our progress and make
+    sure we are on track for the next sprint.
+
+
+
+
+
+
+
+
