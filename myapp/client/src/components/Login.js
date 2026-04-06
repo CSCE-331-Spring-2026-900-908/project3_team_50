@@ -33,6 +33,8 @@ export default function Login({ onLogin }) {
     try {
       const res = await axios.post(`${API}/auth/login`, { pin });
       if (res.data.success) {
+        
+        localStorage.setItem('user', JSON.stringify(res.data.user));
         onLogin(res.data.user);
       }
     } catch (err) {

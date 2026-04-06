@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
 import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
@@ -13,6 +13,19 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 function App() {
   const [user, setUser] = useState(null);
+
+  
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (err) {
+        console.error('Failed to parse stored user:', err);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
   const [showPinBox, setShowPinBox] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
@@ -22,6 +35,8 @@ function App() {
     setPinInput('');
     setPinError('');
     setShowPinBox(false);
+    
+    localStorage.removeItem('user');
   };
 
   const handleCustomerLogout = () => {
