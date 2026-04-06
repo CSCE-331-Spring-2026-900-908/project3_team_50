@@ -13,6 +13,9 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [showPinBox, setShowPinBox] = useState(false);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState('');
 
   
   useEffect(() => {
@@ -26,9 +29,6 @@ function App() {
       }
     }
   }, []);
-  const [showPinBox, setShowPinBox] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
 
   const handleLogout = () => {
     setUser(null);

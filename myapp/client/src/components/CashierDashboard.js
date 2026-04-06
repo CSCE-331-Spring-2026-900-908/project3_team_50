@@ -21,8 +21,10 @@ export default function CashierDashboard() {
 
   // View state — "MENU" | "ADDONS" | "CHECKOUT"
   const [view, setView] = useState('MENU');
+  const [paymentType, setPaymentType] = useState(null); // 'CASH' or 'CARD'
   const [tip, setTip] = useState(0);
   const [customTipInput, setCustomTipInput] = useState('');
+  const [amountProvided, setAmountProvided] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -113,6 +115,7 @@ export default function CashierDashboard() {
         customer_name: customerName || 'Walk-in',
         total: subtotal,
         tip,
+        paymentType,
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,
@@ -121,6 +124,8 @@ export default function CashierDashboard() {
       // Reset
       setOrderItems([]);
       setTip(0);
+      setPaymentType(null);
+      setAmountProvided('');
       setView('MENU');
       setSuccessMessage('Payment Successful!');
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -190,6 +195,10 @@ export default function CashierDashboard() {
             setTip={setTip}
             customTipInput={customTipInput}
             setCustomTipInput={setCustomTipInput}
+            paymentType={paymentType}
+            setPaymentType={setPaymentType}
+            amountProvided={amountProvided}
+            setAmountProvided={setAmountProvided}
             onPay={handleCheckout}
             onBack={() => setView('MENU')}
             isProcessing={isProcessing}
@@ -345,6 +354,10 @@ function CheckoutPanel({
   setTip,
   customTipInput,
   setCustomTipInput,
+  paymentType,
+  setPaymentType,
+  amountProvided,
+  setAmountProvided,
   onPay,
   onBack,
   isProcessing,
@@ -356,6 +369,10 @@ function CheckoutPanel({
     { label: '15%', calc: subtotal * 0.15 },
     { label: '20%', calc: subtotal * 0.2 },
   ];
+
+  const amountProvidedNum = parseFloat(amountProvided) || 0;
+  const change = amountProvidedNum - subtotal;
+  const isValidCashPayment = amountProvidedNum >= subtotal;
 
   return (
     <div className="checkout-panel">
@@ -370,71 +387,168 @@ function CheckoutPanel({
           <span>Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
-        <div className="summary-row">
-          <span>Tip</span>
-          <span>${tip.toFixed(2)}</span>
-        </div>
+        {paymentType === 'CARD' && (
+          <div className="summary-row">
+            <span>Tip</span>
+            <span>${tip.toFixed(2)}</span>
+          </div>
+        )}
         <div className="summary-row total-row">
           <span>Total</span>
-          <span>${(subtotal + tip).toFixed(2)}</span>
+          <span>${(subtotal + (paymentType === 'CARD' ? tip : 0)).toFixed(2)}</span>
         </div>
       </div>
 
-      {/* Tip Buttons */}
-      <div className="tip-section">
-        <h3>Add a Tip</h3>
-        <div className="tip-btns">
-          {tipPresets.map((p) => (
+      {/* Payment Type Selection */}
+      {!paymentType ? (
+        <div className="payment-type-section">
+          <h3>Select Payment Method</h3>
+          <div className="payment-type-btns">
             <button
-              key={p.label}
-              className={`tip-btn ${Math.abs(tip - p.calc) < 0.01 ? 'active' : ''}`}
-              onClick={() => setTip(p.calc)}
+              className="payment-type-btn cash-btn"
+              onClick={() => setPaymentType('CASH')}
             >
-              <span className="tip-pct">{p.label}</span>
-              <span className="tip-amt">${p.calc.toFixed(2)}</span>
+              💵 Cash
             </button>
-          ))}
-          <div className="tip-custom">
-            <input
-              type="number"
-              placeholder="Custom $"
-              value={customTipInput}
-              onChange={(e) => setCustomTipInput(e.target.value)}
-              min="0"
-              step="0.01"
-            />
             <button
-              className="tip-apply"
-              onClick={() => {
-                const val = parseFloat(customTipInput);
-                if (!isNaN(val) && val >= 0) setTip(val);
-              }}
+              className="payment-type-btn card-btn"
+              onClick={() => setPaymentType('CARD')}
             >
-              Apply
+              💳 Card
             </button>
           </div>
         </div>
-      </div>
+      ) : (
+        <>
+          
+          {paymentType === 'CASH' && (
+            <div className="cash-payment-section">
+              <div className="cash-input-group">
+                <label htmlFor="amount-provided">Amount Provided ($)</label>
+                <input
+                  id="amount-provided"
+                  type="number"
+                  placeholder="0.00"
+                  value={amountProvided}
+                  onChange={(e) => setAmountProvided(e.target.value)}
+                  min="0"
+                  step={.01}
+                  autoFocus
+                />
+              </div>
 
-      {/* Customer Name */}
-      <div className="customer-section">
-        <label htmlFor="customer-name">Customer Name (optional)</label>
-        <input
-          id="customer-name"
-          type="text"
-          placeholder="Walk-in"
-          value={customerName}
-          onChange={(e) => setCustomerName(e.target.value)}
-        />
-      </div>
+              {amountProvided && (
+                <div className={`change-display ${change < 0 ? 'insufficient' : ''}`}>
+                  <div className="change-label">Change</div>
+                  <div className={`change-amount ${change < 0 ? 'red' : 'green'}`}>
+                    ${Math.abs(change).toFixed(2)}
+                  </div>
+                  {change < 0 && (
+                    <div className="change-error">Amount insufficient</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
 
-      <button
-        className="pay-btn"
-        onClick={() => onPay(customerName)}
-        disabled={isProcessing}
-      >
-        {isProcessing ? 'Processing…' : `Pay $${(subtotal + tip).toFixed(2)}`}
-      </button>
+          
+          {paymentType === 'CARD' && (
+            <div className="card-payment-section">
+              {/* Tip Buttons */}
+              <div className="tip-section">
+                <h3>Add a Tip</h3>
+                <div className="tip-btns">
+                  {tipPresets.map((p) => (
+                    <button
+                      key={p.label}
+                      className={`tip-btn ${Math.abs(tip - p.calc) < 0.01 ? 'active' : ''}`}
+                      onClick={() => setTip(p.calc)}
+                    >
+                      <span className="tip-pct">{p.label}</span>
+                      <span className="tip-amt">${p.calc.toFixed(2)}</span>
+                    </button>
+                  ))}
+                  <div className="tip-custom">
+                    <input
+                      type="number"
+                      placeholder="Custom $"
+                      value={customTipInput}
+                      onChange={(e) => setCustomTipInput(e.target.value)}
+                      min="0"
+                      step="0.01"
+                    />
+                    <button
+                      className="tip-apply"
+                      onClick={() => {
+                        const val = parseFloat(customTipInput);
+                        if (!isNaN(val) && val >= 0) setTip(val);
+                      }}
+                    >
+                      Apply
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* No Tip for Cash, No Custom Amount Input for Card */}
+          {paymentType === 'CASH' && (
+            <div className="cash-total">
+              <div className="cash-total-row">
+                <span>Amount Due</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="cash-total-row">
+                <span>Amount Provided</span>
+                <span>${amountProvidedNum.toFixed(2)}</span>
+              </div>
+            </div>
+          )}
+
+          
+          <div className="customer-section">
+            <label htmlFor="customer-name">Customer Name (optional)</label>
+            <input
+              id="customer-name"
+              type="text"
+              placeholder="Walk-in"
+              value={customerName}
+              onChange={(e) => setCustomerName(e.target.value)}
+            />
+          </div>
+
+          {/* Payment Buttons */}
+          <div className="payment-actions">
+            <button
+              className="change-payment-btn"
+              onClick={() => {
+                setPaymentType(null);
+                setAmountProvided('');
+                setTip(0);
+                setCustomTipInput('');
+              }}
+            >
+              Change Payment Method
+            </button>
+
+            <button
+              className="pay-btn"
+              onClick={() => onPay(customerName)}
+              disabled={
+                isProcessing ||
+                (paymentType === 'CASH' && !isValidCashPayment)
+              }
+            >
+              {isProcessing
+                ? 'Processing…'
+                : paymentType === 'CASH'
+                ? `Confirm Cash Payment $${subtotal.toFixed(2)}`
+                : `Pay $${(subtotal + tip).toFixed(2)}`}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
