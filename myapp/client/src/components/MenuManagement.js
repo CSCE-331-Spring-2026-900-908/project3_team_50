@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './MenuManagement.css';
+import { BobaIcon } from './BobaIcon';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -24,6 +25,20 @@ export default function MenuManagement() {
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  // Boba Icon testing state
+  const [bobaTest, setBobaTest] = useState({
+    colorTop: '#FFFFFF',
+    colorMiddle: '#E6C9A8',
+    colorBottom: '#2E1A11',
+    showDirty: true,
+    dirtyColor: '#1A0A02',
+    topSwirlColor: '#FFFFFF',
+    noiseFreqX: 0.05,
+    noiseFreqY: 0.01,
+    showBoba: true,
+    showIce: true,
+  });
 
   // ── Fetch all items ────────────────────────────────────────────────
   const loadItems = useCallback(async () => {
@@ -147,6 +162,119 @@ export default function MenuManagement() {
         {/* Toasts */}
         {error && <div className="toast toast-error">{error}</div>}
         {success && <div className="toast toast-success">{success}</div>}
+      </div>
+
+      {/* ── Boba Icon Test Bench ────────────────────────────────────── */}
+      <div className="glass-card" style={{ padding: '2rem', marginBottom: '2rem', display: 'flex', gap: '3rem', alignItems: 'center' }}>
+        <div style={{ width: '180px', height: '240px', backgroundColor: '#F8F9FA', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <BobaIcon
+            liquidGradient={[
+              { offset: "0%", color: bobaTest.colorBottom },
+              { offset: "50%", color: bobaTest.colorMiddle },
+              { offset: "100%", color: bobaTest.colorTop }
+            ]}
+            showDirty={bobaTest.showDirty}
+            dirtyColor={bobaTest.dirtyColor}
+            topSwirlColor={bobaTest.topSwirlColor}
+            noiseFrequencyX={bobaTest.noiseFreqX}
+            noiseFrequencyY={bobaTest.noiseFreqY}
+            showIce={bobaTest.showIce}
+            showBoba={bobaTest.showBoba}
+          />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Liquid Top (Foam)</label>
+            <input 
+              type="color" 
+              value={bobaTest.colorTop} 
+              onChange={e => setBobaTest(prev => ({ ...prev, colorTop: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Liquid Middle (Tea)</label>
+            <input 
+              type="color" 
+              value={bobaTest.colorMiddle} 
+              onChange={e => setBobaTest(prev => ({ ...prev, colorMiddle: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Liquid Bottom</label>
+            <input 
+              type="color" 
+              value={bobaTest.colorBottom} 
+              onChange={e => setBobaTest(prev => ({ ...prev, colorBottom: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Marble Swirl</label>
+            <input 
+              type="checkbox" 
+              checked={bobaTest.showDirty} 
+              onChange={e => setBobaTest(prev => ({ ...prev, showDirty: e.target.checked }))} 
+              style={{ width: '20px', height: '20px', accentColor: '#FF1E90', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Top Milk Swirl</label>
+            <input 
+              type="color" 
+              value={bobaTest.topSwirlColor} 
+              onChange={e => setBobaTest(prev => ({ ...prev, topSwirlColor: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', gridColumn: '1 / span 2' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Swirl Color</label>
+            <input 
+              type="color" 
+              value={bobaTest.dirtyColor} 
+              onChange={e => setBobaTest(prev => ({ ...prev, dirtyColor: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', flexShrink: 0 }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', gridColumn: '1 / span 2' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Noise X</label>
+            <input 
+              type="range" min="0.001" max="0.3" step="0.001"
+              value={bobaTest.noiseFreqX} 
+              onChange={e => setBobaTest(prev => ({ ...prev, noiseFreqX: parseFloat(e.target.value) }))} 
+              style={{ flex: 1, marginLeft: '1rem' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', gridColumn: '1 / span 2' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Noise Y</label>
+            <input 
+              type="range" min="0.001" max="0.3" step="0.001"
+              value={bobaTest.noiseFreqY} 
+              onChange={e => setBobaTest(prev => ({ ...prev, noiseFreqY: parseFloat(e.target.value) }))} 
+              style={{ flex: 1, marginLeft: '1rem' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Ice Cubes</label>
+            <input 
+              type="checkbox" 
+              checked={bobaTest.showIce} 
+              onChange={e => setBobaTest(prev => ({ ...prev, showIce: e.target.checked }))} 
+              style={{ width: '20px', height: '20px', accentColor: '#FF1E90', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Boba Pearls</label>
+            <input 
+              type="checkbox" 
+              checked={bobaTest.showBoba} 
+              onChange={e => setBobaTest(prev => ({ ...prev, showBoba: e.target.checked }))} 
+              style={{ width: '20px', height: '20px', accentColor: '#FF1E90', cursor: 'pointer' }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* ── Table ─────────────────────────────────────────────────── */}
