@@ -19,20 +19,62 @@ export default function Kiosk() {
   const [orderItems, setOrderItems] = useState([]);
   const [currentItemIndex, setCurrentItemIndex] = useState(null);
 
-  // View state — "CATEGORIES" | "ITEMS" | "ADDONS" | "CHECKOUT"
-  const [view, setView] = useState('CATEGORIES');
+  // View state — "CUSTOMER_INFO" | "CATEGORIES" | "ITEMS" | "ADDONS" | "CHECKOUT"
+  const [view, setView] = useState('CUSTOMER_INFO');
   const [tip, setTip] = useState(0);
   const [customTipInput, setCustomTipInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [customerFirstName, setCustomerFirstName] = useState('');
+  const [customerLastName, setCustomerLastName] = useState('');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerId, setCustomerId] = useState(null);
+  const [showNameModal, setShowNameModal] = useState(false);
+  const [nameModalTitle, setNameModalTitle] = useState('');
+  const [tempFirstName, setTempFirstName] = useState('');
+  const [tempLastName, setTempLastName] = useState('');
 
-  // ── Derived values ─────────────────────────────────────────────────
+  
   const subtotal = orderItems.reduce(
     (sum, item) => sum + item.basePrice + item.bobaPrice,
     0
   );
 
-  // ── Data fetching ──────────────────────────────────────────────────
+  
+  useEffect(() => {
+    const savedSession = localStorage.getItem('kiosk_customer_session');
+    if (savedSession) {
+      try {
+        const session = JSON.parse(savedSession);
+        setCustomerId(session.customerId);
+        setCustomerFirstName(session.customerFirstName);
+        setCustomerLastName(session.customerLastName);
+        setCustomerEmail(session.customerEmail);
+        setCustomerPhone(session.customerPhone);
+        setView('CATEGORIES');
+      } catch (err) {
+        console.error('Failed to restore session:', err);
+        localStorage.removeItem('kiosk_customer_session');
+      }
+    }
+  }, []);
+
+  // ── Save customer session to localStorage when customer data changes ──
+  useEffect(() => {
+    if (customerId && view !== 'CUSTOMER_INFO') {
+      const session = {
+        customerId,
+        customerFirstName,
+        customerLastName,
+        customerEmail,
+        customerPhone,
+      };
+      localStorage.setItem('kiosk_customer_session', JSON.stringify(session));
+    }
+  }, [customerId, customerFirstName, customerLastName, customerEmail, customerPhone, view]);
+
+ 
   useEffect(() => {
     axios.get(`${API}/menu/categories`).then((r) => {
       setCategories(r.data);
@@ -60,6 +102,27 @@ export default function Kiosk() {
   const handleBackToCategories = () => {
     setView('CATEGORIES');
     setActiveCategory(null);
+  };
+
+  // ── Logout handler ──────────────────────────────────────────────────
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout? Your order will be cleared.')) {
+      // Clear all customer data
+      setCustomerId(null);
+      setCustomerFirstName('');
+      setCustomerLastName('');
+      setCustomerEmail('');
+      setCustomerPhone('');
+      setOrderItems([]);
+      setActiveCategory(null);
+      setTip(0);
+      setCustomTipInput('');
+      setSuccessMessage('');
+      setView('CUSTOMER_INFO');
+      
+      // Clear localStorage session
+      localStorage.removeItem('kiosk_customer_session');
+    }
   };
 
   const addItemToOrder = (item) => {
@@ -130,7 +193,12 @@ export default function Kiosk() {
       // Reset
       setOrderItems([]);
       setTip(0);
-      setView('CATEGORIES');
+      setView('CUSTOMER_INFO');
+      setCustomerFirstName('');
+      setCustomerLastName('');
+      setCustomerEmail('');
+      setCustomerPhone('');
+      setCustomerId(null);
       setSuccessMessage('Payment Successful!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
@@ -140,92 +208,216 @@ export default function Kiosk() {
     }
   };
 
-  // ── Render ─────────────────────────────────────────────────────────
+  
+  const handleCustomerInfoContinue = async () => {
+    // If neither email nor phone provided, just skip to categories
+    if (!customerEmail.trim() && !customerPhone.trim()) {
+      setView('CATEGORIES');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      
+      const lookupRes = await axios.post(`${API}/auth/customer-lookup`, {
+        email: customerEmail,
+        phone: customerPhone,
+      });
+
+      const { found, customer, missingField } = lookupRes.data;
+
+      if (found) {
+        
+        setCustomerId(customer.cus_id);
+        setCustomerFirstName(customer.first_name || '');
+        setCustomerLastName(customer.last_name || '');
+
+        if (missingField && missingField !== 'none') {
+          
+          if (missingField === 'both') {
+            setNameModalTitle('Complete Your Profile');
+            setTempFirstName('');
+            setTempLastName('');
+            setShowNameModal(true);
+          } else if (missingField === 'email' || missingField === 'phone') {
+            // Single field missing - proceed (handle manual entry at checkout if needed)
+            setView('CATEGORIES');
+          }
+        } else {
+          
+          setView('CATEGORIES');
+        }
+      } else {
+        
+        setNameModalTitle('Register New Account');
+        setTempFirstName('');
+        setTempLastName('');
+        setShowNameModal(true);
+      }
+    } catch (err) {
+      alert('Error: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  
+  const handleNameModalSubmit = async () => {
+    if (!tempFirstName.trim() || !tempLastName.trim()) {
+      alert('Please enter both first and last name');
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      const registerRes = await axios.post(`${API}/auth/register-customer`, {
+        first_name: tempFirstName,
+        last_name: tempLastName,
+        email: customerEmail,
+        phone: customerPhone,
+        customer_id: customerId || null,
+      });
+
+      setCustomerId(registerRes.data.customer_id);
+      setCustomerFirstName(tempFirstName);
+      setCustomerLastName(tempLastName);
+      setShowNameModal(false);
+      setView('CATEGORIES');
+    } catch (err) {
+      alert('Registration error: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  
   return (
     <div className="kiosk-layout">
-      {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
-      <div className="kiosk-main">
-        {view === 'CATEGORIES' && (
-          <div className="categories-view">
-            <h1 className="kiosk-title">Select a Category</h1>
-            <div className="categories-grid">
-              {categories.map((category) => (
-                <button
-                  key={category}
-                  className="category-box"
-                  onClick={() => handleCategoryClick(category)}
-                >
-                  <div className="category-image">
-                    {getCategoryEmoji(category)}
-                  </div>
-                  <span className="category-name">{category}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {view === 'ITEMS' && activeCategory && (
-          <div className="items-view">
-            <button className="back-arrow" onClick={handleBackToCategories}>
-              ← Back
-            </button>
-            <h2 className="items-title">{activeCategory}</h2>
-            <div className="items-grid">
-              {menuItems.map((item) => (
-                <button
-                  key={item.item_id}
-                  className="item-card glass-card"
-                  onClick={() => addItemToOrder(item)}
-                >
-                  <span className="item-name">{item.item_name}</span>
-                  <span className="item-price">${parseFloat(item.price).toFixed(2)}</span>
-                </button>
-              ))}
-              {menuItems.length === 0 && (
-                <p className="empty-hint">No items in this category</p>
+      {/* ── HEADER with Logout Button ──────────────────────────────── */}
+      {view !== 'CUSTOMER_INFO' && (
+        <div className="kiosk-header">
+          <div className="header-content">
+            <div className="header-welcome">
+              {customerFirstName && customerLastName && (
+                <span>Welcome, {customerFirstName}!</span>
               )}
             </div>
-          </div>
-        )}
-
-        {view === 'ADDONS' && currentItemIndex !== null && (
-          <div className="addons-view">
-            <button className="back-arrow" onClick={() => {
-              setCurrentItemIndex(null);
-              setView('ITEMS');
-            }}>
-              ← Back
+            <button className="logout-btn-header" onClick={handleLogout}>
+              ← Back / Logout
             </button>
-            <AddonsPanel
-              item={orderItems[currentItemIndex]}
-              bobaToppings={bobaToppings}
-              onSelectBoba={selectBoba}
-              onUpdateItem={updateCurrentItem}
-              onDone={() => {
+          </div>
+        </div>
+      )}
+      
+      {showNameModal && (
+        <NameEntryModal
+          title={nameModalTitle}
+          firstName={tempFirstName}
+          lastName={tempLastName}
+          onFirstNameChange={setTempFirstName}
+          onLastNameChange={setTempLastName}
+          onSubmit={handleNameModalSubmit}
+          isProcessing={isProcessing}
+        />
+      )}
+
+      <div className="kiosk-content-wrapper">
+        {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
+        <div className="kiosk-main">
+          {view === 'CUSTOMER_INFO' && (
+            <CustomerInfoPrompt
+              email={customerEmail}
+              phone={customerPhone}
+              onFirstNameChange={setCustomerFirstName}
+              onLastNameChange={setCustomerLastName}
+              onEmailChange={setCustomerEmail}
+              onPhoneChange={setCustomerPhone}
+              onContinue={handleCustomerInfoContinue}
+              isProcessing={isProcessing}
+            />
+          )}
+
+          {view === 'CATEGORIES' && (
+            <div className="categories-view">
+              <h1 className="kiosk-title">Select a Category</h1>
+              <div className="categories-grid">
+                {categories.map((category) => (
+                  <button
+                    key={category}
+                    className="category-box"
+                    onClick={() => handleCategoryClick(category)}
+                  >
+                    <div className="category-image">
+                      {getCategoryEmoji(category)}
+                    </div>
+                    <span className="category-name">{category}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {view === 'ITEMS' && activeCategory && (
+            <div className="items-view">
+              <button className="back-arrow" onClick={handleBackToCategories}>
+                ← Back
+              </button>
+              <h2 className="items-title">{activeCategory}</h2>
+              <div className="items-grid">
+                {menuItems.map((item) => (
+                  <button
+                    key={item.item_id}
+                    className="item-card glass-card"
+                    onClick={() => addItemToOrder(item)}
+                  >
+                    <span className="item-name">{item.item_name}</span>
+                    <span className="item-price">${parseFloat(item.price).toFixed(2)}</span>
+                  </button>
+                ))}
+                {menuItems.length === 0 && (
+                  <p className="empty-hint">No items in this category</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {view === 'ADDONS' && currentItemIndex !== null && (
+            <div className="addons-view">
+              <button className="back-arrow" onClick={() => {
                 setCurrentItemIndex(null);
                 setView('ITEMS');
-              }}
+              }}>
+                ← Back
+              </button>
+              <AddonsPanel
+                item={orderItems[currentItemIndex]}
+                bobaToppings={bobaToppings}
+                onSelectBoba={selectBoba}
+                onUpdateItem={updateCurrentItem}
+                onDone={() => {
+                  setCurrentItemIndex(null);
+                  setView('ITEMS');
+                }}
+              />
+            </div>
+          )}
+
+          {view === 'CHECKOUT' && (
+            <CheckoutPanel
+              subtotal={subtotal}
+              tip={tip}
+              setTip={setTip}
+              customTipInput={customTipInput}
+              setCustomTipInput={setCustomTipInput}
+              onPay={handleCheckout}
+              onBack={() => setView('ITEMS')}
+              isProcessing={isProcessing}
             />
-          </div>
-        )}
+          )}
+        </div>
 
-        {view === 'CHECKOUT' && (
-          <CheckoutPanel
-            subtotal={subtotal}
-            tip={tip}
-            setTip={setTip}
-            customTipInput={customTipInput}
-            setCustomTipInput={setCustomTipInput}
-            onPay={handleCheckout}
-            onBack={() => setView('ITEMS')}
-            isProcessing={isProcessing}
-          />
-        )}
-      </div>
-
-      {/* ── RIGHT: Order summary ──────────────────────────────────── */}
-      <aside className="order-sidebar glass-card">
+        {/* ── RIGHT: Order summary ──────────────────────────────────── */}
+        <aside className="order-sidebar glass-card">
         <h3 className="sidebar-title">Current Order</h3>
 
         {successMessage && (
@@ -284,7 +476,8 @@ export default function Kiosk() {
         >
           Checkout
         </button>
-      </aside>
+        </aside>
+      </div>
     </div>
   );
 }
@@ -474,6 +667,104 @@ function CheckoutPanel({
       >
         {isProcessing ? 'Processing…' : `Pay $${(subtotal + tip).toFixed(2)}`}
       </button>
+    </div>
+  );
+}
+
+
+function CustomerInfoPrompt({ email, phone, onEmailChange, onPhoneChange, onContinue, isProcessing }) {
+  return (
+    <div className="customer-info-modal">
+      <div className="customer-info-box">
+        <h1 className="customer-info-title">Welcome!</h1>
+        <p className="customer-info-subtitle">
+          Do you have an account with us?
+        </p>
+        <p className="customer-info-text">
+          Share your email or phone number so we can save your preferences and order history.
+        </p>
+        <div className = "customer-info-inputs">
+
+        </div>
+        <div className="customer-info-inputs">
+          <div className="input-group">
+            <label htmlFor="customer-email">Email (optional)</label>
+            <input
+              id="customer-email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => onEmailChange(e.target.value)}
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="customer-phone">Phone (optional)</label>
+            <input
+              id="customer-phone"
+              type="tel"
+              placeholder="(123) 456-7890"
+              value={phone}
+              onChange={(e) => onPhoneChange(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="customer-info-actions">
+          <button className="continue-btn" onClick={onContinue} disabled={isProcessing}>
+            {isProcessing ? 'Processing…' : 'Continue'}
+          </button>
+          <button className="skip-link" onClick={onContinue} disabled={isProcessing}>
+            Skip
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+function NameEntryModal({ title, firstName, lastName, onFirstNameChange, onLastNameChange, onSubmit, isProcessing }) {
+  return (
+    <div className="customer-info-modal">
+      <div className="customer-info-box">
+        <h1 className="customer-info-title">{title}</h1>
+        <p className="customer-info-text">
+          Please enter your name to continue.
+        </p>
+
+        <div className="customer-info-inputs">
+          <div className="input-group">
+            <label htmlFor="first-name">First Name</label>
+            <input
+              id="first-name"
+              type="text"
+              placeholder="John"
+              value={firstName}
+              onChange={(e) => onFirstNameChange(e.target.value)}
+              disabled={isProcessing}
+            />
+          </div>
+
+          <div className="input-group">
+            <label htmlFor="last-name">Last Name</label>
+            <input
+              id="last-name"
+              type="text"
+              placeholder="Doe"
+              value={lastName}
+              onChange={(e) => onLastNameChange(e.target.value)}
+              disabled={isProcessing}
+            />
+          </div>
+        </div>
+
+        <div className="customer-info-actions">
+          <button className="continue-btn" onClick={onSubmit} disabled={isProcessing}>
+            {isProcessing ? 'Processing…' : 'Submit'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -135,7 +135,49 @@ Minutes:
 
 
 
+04/6/2026 Meeting 4
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
 
+Meeting Agenda Items:
+    Sprint 2 Planning
+    Task Distribution for Sprint 2
 
+Updates:
+    Inventory Management System is working and has basic functionality
+    Keyboard inputs for login added
+    Payment type added to cashier
 
+Tasks Completed:
+    Payment type added to cashier
+        Assigned to: Mason Mote
+        Completed? (yes/no): Yes
+
+    Inventory Management System is working and has basic functionality
+        Assigned to: Gavin Bono and Michael Rao
+        Completed? (yes/no): Yes
+
+Before The Next Meeting
+Plans:
+    Add more functionality to inventory management system based on user studies and feedback
+    Add images to menu items
+    Add accessibility features to the application
+
+Task Assignments:
+    Task Description: Add more functionality to inventory management system based on user studies and feedback
+    Assigned to: Gavin
+
+    Task Description: Add images to menu items
+    Assigned to: Britton 
+
+    Task Description: Start Machine Translation for Accessibility Features 
+    Assigned to: Michael  
+
+    Task Description: Add customer accounts for above and beyond feture.
+    Assigned to: Mason
+
+Minutes:
+    Based on observations of other teams, we are on track making good progress. 
+    We need to start adding features for sprint 2. 
+    Start doing accessibility features and adding images to menu items to make the application more user friendly.
+    Start customer info. 
 
