@@ -8,6 +8,13 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
    Cashier Dashboard — POS view
    Translates CashierDashboard.java to React
    ═══════════════════════════════════════════════════════════════════════ */
+   
+   //When starting an order, ask customer if they have an account (email/phone lookup): pre-fill name if found
+   //Take order, and ask if they want to use points to add a discount (if they have an account)
+   //points can be used only in whole dollar amounts (10 points)
+   //then proceed to payment method as normal.
+  
+
 export default function CashierDashboard() {
   // ── State ──────────────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);

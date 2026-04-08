@@ -8,6 +8,15 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
    Kiosk — Customer ordering view
    Mirrors CashierDashboard but for customer self-service
    ═══════════════════════════════════════════════════════════════════════ */
+   //for customers with accounts, points displayed in the corner of the screen.
+   //upon checkout, customer earns the rounded down dollar amount of points. $5.60 = 5 points
+   //option to use points at checkout. Can accept or deny. Can pic how many point they want to use. in whole dollar amounts. 
+   //10 points is worth 1 dollar. using 130 points on a $13 dollar order makes it free but also resets points to 0. using 10 points on a $5.60 order makes it $4.60 
+   //Orders where a discount is use is void to earn points.
+   //Customer with account, Past 3 orders are listed in the bottom left corner. Rebuy button. On click and the order is populated. 
+   //Upon purchase, reorder section is updates. 
+
+   
 export default function Kiosk() {
   // ── State ──────────────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
