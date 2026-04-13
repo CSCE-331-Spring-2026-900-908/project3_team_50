@@ -231,3 +231,49 @@ Minutes:
     We also need to start on the accessibility features, as that is a big part of our project
     We need to finish the above and beyond features.
     
+
+04/10/2026 Meeting 6
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items:
+    Final updates for Sprint 2
+    What do we need for the next demonstration
+
+Updates:
+    Weather API is in progress
+    images are still in progress
+    Accessibility features are in progress
+    Point system and point payment is in progress
+
+Tasks Completed:
+    Task Description: Add more functionality to inventory management system based on user studies and feedback
+    Assigned to: Gavin
+    Completed? (yes/no): Yes   
+
+    Task Description: Customer Accounts for above and beyond feature
+    Assigned to: Mason
+    Completed? (yes/no): Yes
+
+Before The Next Meeting
+Plans:
+    Finish up the remaining tasks for sprint 2. We need bare minimum the weather API
+    Images can be wrapped soon so we need to start on translation fetures. 
+    Rewards System for above and beyond features can be wrapped soon.
+
+Task Assignments:
+    Task Description: Add images to menu items
+    Assigned to: Britton
+    
+    Task Description: Start Machine Translation for Accessibility Features
+    Assigned to: Michael
+
+    Task Description: Add point system and point payment to customer Accounts  
+    Assigned to: Mason
+
+    Task Description: Finish Weather API
+    Assigned to: Gavin
+    
+Minutes:
+    We really need to wrap up the remaining features for sprint 2. 
+    We are behind on our schedule and we need to get these features done.
+    We have been busy, but we need to get these things done asap.
+
