@@ -267,7 +267,7 @@ export default function CashierDashboard() {
           className="checkout-btn"
           disabled={orderItems.length === 0}
           onClick={() => {
-            setTip(0);
+            setTip(subtotal * 0.2);
             setView('CHECKOUT');
           }}
         >
@@ -283,6 +283,9 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
   const iceOptions = ['Regular Ice', 'Less Ice', 'No Ice'];
   const sweetnessOptions = ['More Sweet', 'Regular Sweet', 'Less Sweet'];
 
+  const poppingBoba = bobaToppings.filter(t => t.name.toLowerCase().includes('popping')).sort((a,b) => a.name.localeCompare(b.name));
+  const otherBoba = bobaToppings.filter(t => !t.name.toLowerCase().includes('popping')).sort((a,b) => a.name.localeCompare(b.name));
+
   return (
     <div className="addons-panel">
       <h2 className="addons-heading">
@@ -292,16 +295,42 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
       {/* Boba */}
       <div className="addon-section">
         <h3 className="addon-section-title">🧋 Boba Toppings — $0.50 each</h3>
+        
+        {otherBoba.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Classic & Jelly</h4>
+            <div className="addon-options">
+              {otherBoba.map((t) => (
+                <button
+                  key={t.id}
+                  className={`addon-btn ${item.bobaInventoryId === t.id ? 'selected' : ''}`}
+                  onClick={() => onSelectBoba(t)}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {poppingBoba.length > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Popping Boba</h4>
+            <div className="addon-options">
+              {poppingBoba.map((t) => (
+                <button
+                  key={t.id}
+                  className={`addon-btn ${item.bobaInventoryId === t.id ? 'selected' : ''}`}
+                  onClick={() => onSelectBoba(t)}
+                >
+                  {t.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="addon-options">
-          {bobaToppings.map((t) => (
-            <button
-              key={t.id}
-              className={`addon-btn ${item.bobaInventoryId === t.id ? 'selected' : ''}`}
-              onClick={() => onSelectBoba(t)}
-            >
-              {t.name}
-            </button>
-          ))}
           <button
             className={`addon-btn ${item.bobaInventoryId === -1 ? 'selected' : ''}`}
             onClick={() =>

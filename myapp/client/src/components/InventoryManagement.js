@@ -39,6 +39,27 @@ export default function InventoryManagement() {
     loadItems();
   }, [loadItems]);
 
+  // Sync form automatically if user clicks a different row while in "edit" mode
+  useEffect(() => {
+    if (modal === 'edit') {
+      if (selectedId === null) {
+        setModal(null);
+      } else {
+        const item = items.find((i) => i.inventory_id === selectedId);
+        if (item) {
+          setForm({
+            name: item.name ?? '',
+            current_stock: String(item.current_stock ?? ''),
+            max_stock: String(item.max_stock ?? ''),
+            min_stock: String(item.min_stock ?? ''),
+            unit: item.unit ?? '',
+            unit_cost: String(item.unit_cost ?? ''),
+          });
+        }
+      }
+    }
+  }, [selectedId, items, modal]);
+
   const flashError = (msg) => {
     setError(msg);
     setTimeout(() => setError(''), 3000);
@@ -205,7 +226,10 @@ export default function InventoryManagement() {
         {success && <div className="toast toast-success">{success}</div>}
       </div>
 
-      <div className="table-wrapper glass-card">
+      {/* ── Main Layout ───────────────────────────────────────────── */}
+      <div className="mgmt-main-content">
+        <div className="mgmt-left-panel">
+          <div className="table-wrapper glass-card">
         <table className="mgmt-table" id="inventory-table">
           <thead>
             <tr>
@@ -285,78 +309,91 @@ export default function InventoryManagement() {
         </button>
       </div>
 
-      {modal && (
-        <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>{modal === 'add' ? 'Add New Inventory Item' : 'Update Inventory Item'}</h2>
+        </div>
 
-            <label>
-              Name
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </label>
+        {/* ── Right Panel Form ──────────────────────────────────────── */}
+        {modal && (
+          <div className="mgmt-right-panel glass-card">
+            <div className="mgmt-form-header">
+              <h2>{modal === 'add' ? 'Add New Inventory Item' : 'Update Inventory Item'}</h2>
+              <button className="mgmt-close-btn" onClick={() => setModal(null)}>&times;</button>
+            </div>
 
-            <label>
-              Current Stock
-              <input
-                type="number"
-                step="0.01"
-                value={form.current_stock}
-                onChange={(e) => setForm({ ...form, current_stock: e.target.value })}
-              />
-            </label>
+            <div className="mgmt-form-body">
+              <label>
+                Name
+                <input
+                  type="text"
+                  placeholder="e.g. Black Tea Leaves"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Max Stock
-              <input
-                type="number"
-                step="0.01"
-                value={form.max_stock}
-                onChange={(e) => setForm({ ...form, max_stock: e.target.value })}
-              />
-            </label>
+              <label>
+                Current Stock
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 50"
+                  value={form.current_stock}
+                  onChange={(e) => setForm({ ...form, current_stock: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Min Stock
-              <input
-                type="number"
-                step="0.01"
-                value={form.min_stock}
-                onChange={(e) => setForm({ ...form, min_stock: e.target.value })}
-              />
-            </label>
+              <label>
+                Max Stock
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 100"
+                  value={form.max_stock}
+                  onChange={(e) => setForm({ ...form, max_stock: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Unit
-              <input
-                type="text"
-                value={form.unit}
-                onChange={(e) => setForm({ ...form, unit: e.target.value })}
-              />
-            </label>
+              <label>
+                Min Stock
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 10"
+                  value={form.min_stock}
+                  onChange={(e) => setForm({ ...form, min_stock: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Unit Cost
-              <input
-                type="number"
-                step="0.01"
-                value={form.unit_cost}
-                onChange={(e) => setForm({ ...form, unit_cost: e.target.value })}
-              />
-            </label>
+              <label>
+                Unit
+                <input
+                  type="text"
+                  placeholder="e.g. lbs, oz, cups"
+                  value={form.unit}
+                  onChange={(e) => setForm({ ...form, unit: e.target.value })}
+                />
+              </label>
 
-            <div className="modal-btns">
+              <label>
+                Unit Cost
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 1.50"
+                  value={form.unit_cost}
+                  onChange={(e) => setForm({ ...form, unit_cost: e.target.value })}
+                />
+              </label>
+            </div>
+
+            <div className="mgmt-form-footer">
               <button className="modal-cancel" onClick={() => setModal(null)}>Cancel</button>
               <button className="modal-confirm" onClick={modal === 'add' ? handleAdd : handleUpdate}>
                 {modal === 'add' ? 'Add Item' : 'Save Changes'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

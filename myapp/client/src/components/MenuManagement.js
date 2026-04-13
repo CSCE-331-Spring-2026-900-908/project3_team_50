@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import './MenuManagement.css';
+import { BobaIcon } from './BobaIcon';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -25,6 +26,20 @@ export default function MenuManagement() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  // Boba Icon testing state
+  const [bobaTest, setBobaTest] = useState({
+    colorTop: '#FFFFFF',
+    colorMiddle: '#E6C9A8',
+    colorBottom: '#2E1A11',
+    showDirty: true,
+    dirtyColor: '#1A0A02',
+    topSwirlColor: '#FFFFFF',
+    noiseFreqX: 0.05,
+    noiseFreqY: 0.01,
+    showBoba: true,
+    showIce: true,
+  });
+
   // ── Fetch all items ────────────────────────────────────────────────
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -41,6 +56,25 @@ export default function MenuManagement() {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  // Sync form automatically if user clicks a different row while in "edit" mode
+  useEffect(() => {
+    if (modal === 'edit') {
+      if (selectedId === null) {
+        setModal(null);
+      } else {
+        const item = items.find((i) => i.item_id === selectedId);
+        if (item) {
+          setForm({
+            item_name: item.item_name,
+            item_category: item.item_category,
+            price: parseFloat(item.price).toFixed(2),
+            ingredient_ids: item.ingredients || '',
+          });
+        }
+      }
+    }
+  }, [selectedId, items, modal]);
 
   // ── Helpers ────────────────────────────────────────────────────────
   const openAdd = () => {
@@ -149,7 +183,128 @@ export default function MenuManagement() {
         {success && <div className="toast toast-success">{success}</div>}
       </div>
 
-      {/* ── Table ─────────────────────────────────────────────────── */}
+      {/* ── Boba Icon Test Bench ────────────────────────────────────── */}
+      <details style={{ marginBottom: '1rem' }}>
+        <summary style={{ padding: '10px', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer', background: 'var(--bg-glass)', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+          Toggle Component Test Bench (Boba Icons)
+        </summary>
+        <div className="glass-card" style={{ padding: '2rem', marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '3rem', alignItems: 'center' }}>
+          <div style={{ width: '180px', height: '240px', backgroundColor: '#F8F9FA', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <BobaIcon
+            liquidGradient={[
+              { offset: "0%", color: bobaTest.colorBottom },
+              { offset: "50%", color: bobaTest.colorMiddle },
+              { offset: "100%", color: bobaTest.colorTop }
+            ]}
+            showDirty={bobaTest.showDirty}
+            dirtyColor={bobaTest.dirtyColor}
+            topSwirlColor={bobaTest.topSwirlColor}
+            noiseFrequencyX={bobaTest.noiseFreqX}
+            noiseFrequencyY={bobaTest.noiseFreqY}
+            showIce={bobaTest.showIce}
+            showBoba={bobaTest.showBoba}
+          />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Liquid Top (Foam)</label>
+            <input 
+              type="color" 
+              value={bobaTest.colorTop} 
+              onChange={e => setBobaTest(prev => ({ ...prev, colorTop: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Liquid Middle (Tea)</label>
+            <input 
+              type="color" 
+              value={bobaTest.colorMiddle} 
+              onChange={e => setBobaTest(prev => ({ ...prev, colorMiddle: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Liquid Bottom</label>
+            <input 
+              type="color" 
+              value={bobaTest.colorBottom} 
+              onChange={e => setBobaTest(prev => ({ ...prev, colorBottom: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Marble Swirl</label>
+            <input 
+              type="checkbox" 
+              checked={bobaTest.showDirty} 
+              onChange={e => setBobaTest(prev => ({ ...prev, showDirty: e.target.checked }))} 
+              style={{ width: '20px', height: '20px', accentColor: '#FF1E90', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Top Milk Swirl</label>
+            <input 
+              type="color" 
+              value={bobaTest.topSwirlColor} 
+              onChange={e => setBobaTest(prev => ({ ...prev, topSwirlColor: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', gridColumn: '1 / span 2' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Swirl Color</label>
+            <input 
+              type="color" 
+              value={bobaTest.dirtyColor} 
+              onChange={e => setBobaTest(prev => ({ ...prev, dirtyColor: e.target.value }))} 
+              style={{ border: 'none', width: '40px', height: '40px', borderRadius: '8px', cursor: 'pointer', flexShrink: 0 }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', gridColumn: '1 / span 2' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Noise X</label>
+            <input 
+              type="range" min="0.001" max="0.3" step="0.001"
+              value={bobaTest.noiseFreqX} 
+              onChange={e => setBobaTest(prev => ({ ...prev, noiseFreqX: parseFloat(e.target.value) }))} 
+              style={{ flex: 1, marginLeft: '1rem' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', gridColumn: '1 / span 2' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Noise Y</label>
+            <input 
+              type="range" min="0.001" max="0.3" step="0.001"
+              value={bobaTest.noiseFreqY} 
+              onChange={e => setBobaTest(prev => ({ ...prev, noiseFreqY: parseFloat(e.target.value) }))} 
+              style={{ flex: 1, marginLeft: '1rem' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Ice Cubes</label>
+            <input 
+              type="checkbox" 
+              checked={bobaTest.showIce} 
+              onChange={e => setBobaTest(prev => ({ ...prev, showIce: e.target.checked }))} 
+              style={{ width: '20px', height: '20px', accentColor: '#FF1E90', cursor: 'pointer' }}
+            />
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+            <label style={{ fontWeight: 600, fontSize: '0.9rem' }}>Boba Pearls</label>
+            <input 
+              type="checkbox" 
+              checked={bobaTest.showBoba} 
+              onChange={e => setBobaTest(prev => ({ ...prev, showBoba: e.target.checked }))} 
+              style={{ width: '20px', height: '20px', accentColor: '#FF1E90', cursor: 'pointer' }}
+            />
+          </div>
+        </div>
+        </div>
+      </details>
+
+      {/* ── Main Layout ───────────────────────────────────────────── */}
+      <div className="mgmt-main-content">
+        <div className="mgmt-left-panel">
+          {/* ── Table ─────────────────────────────────────────────────── */}
       <div className="table-wrapper glass-card">
         <table className="mgmt-table" id="menu-table">
           <thead>
@@ -209,51 +364,60 @@ export default function MenuManagement() {
         </button>
       </div>
 
-      {/* ── Modal ─────────────────────────────────────────────────── */}
-      {modal && (
-        <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>{modal === 'add' ? 'Add New Menu Item' : 'Update Menu Item'}</h2>
+        </div>
 
-            <label>
-              Item Name
-              <input
-                type="text"
-                value={form.item_name}
-                onChange={(e) => setForm({ ...form, item_name: e.target.value })}
-              />
-            </label>
+        {/* ── Right Panel ─────────────────────────────────────────── */}
+        {modal && (
+          <div className="mgmt-right-panel glass-card">
+            <div className="mgmt-form-header">
+              <h2>{modal === 'add' ? 'Add New Menu Item' : 'Update Menu Item'}</h2>
+              <button className="mgmt-close-btn" onClick={() => setModal(null)}>&times;</button>
+            </div>
 
-            <label>
-              Category
-              <input
-                type="text"
-                value={form.item_category}
-                onChange={(e) => setForm({ ...form, item_category: e.target.value })}
-              />
-            </label>
+            <div className="mgmt-form-body">
+              <label>
+                Item Name
+                <input
+                  type="text"
+                  placeholder="e.g. Classic Milk Tea"
+                  value={form.item_name}
+                  onChange={(e) => setForm({ ...form, item_name: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Price
-              <input
-                type="number"
-                step="0.01"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-              />
-            </label>
+              <label>
+                Category
+                <input
+                  type="text"
+                  placeholder="e.g. Milk Tea"
+                  value={form.item_category}
+                  onChange={(e) => setForm({ ...form, item_category: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Ingredient IDs (comma-separated)
-              <input
-                type="text"
-                placeholder="1, 5, 9, 12"
-                value={form.ingredient_ids}
-                onChange={(e) => setForm({ ...form, ingredient_ids: e.target.value })}
-              />
-            </label>
+              <label>
+                Price
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 5.99"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </label>
 
-            <div className="modal-btns">
+              <label>
+                Ingredient IDs (comma-separated)
+                <input
+                  type="text"
+                  placeholder="1, 5, 9, 12"
+                  value={form.ingredient_ids}
+                  onChange={(e) => setForm({ ...form, ingredient_ids: e.target.value })}
+                />
+              </label>
+            </div>
+
+            <div className="mgmt-form-footer">
               <button className="modal-cancel" onClick={() => setModal(null)}>
                 Cancel
               </button>
@@ -265,8 +429,8 @@ export default function MenuManagement() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
