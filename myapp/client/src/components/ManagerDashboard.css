@@ -70,3 +70,130 @@
 .muted {
   color: var(--text-muted);
 }
+
+.weather-dashboard-panel {
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.weather-dashboard-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+}
+
+.weather-dashboard-header p {
+  margin: 6px 0 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+}
+
+.weather-dashboard-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  border-radius: var(--radius-lg);
+  background: rgba(91, 44, 160, 0.04);
+}
+
+.weather-dashboard-state p {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.weather-dashboard-error {
+  background: rgba(198, 40, 40, 0.06);
+}
+
+.weather-dashboard-error p {
+  color: #c62828;
+  font-weight: 600;
+  text-align: center;
+}
+
+.weather-dashboard-card {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(91, 44, 160, 0.08), rgba(255, 255, 255, 0.65));
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.weather-main-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.weather-main-row h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--text-primary);
+}
+
+.weather-description {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  text-transform: capitalize;
+}
+
+.weather-temp-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.weather-temp {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: var(--clr-primary);
+  line-height: 1;
+}
+
+.weather-condition {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.weather-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.weather-detail-item {
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.weather-detail-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.weather-detail-value {
+  font-size: 1rem;
+  color: var(--text-primary);
+  font-weight: 700;
+}
