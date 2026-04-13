@@ -15,6 +15,22 @@
   z-index: 1000;
 }
 
+.login-language-switcher {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.login-language-switcher .language-select-wrap label {
+  color: var(--text-secondary);
+}
+
+.login-language-switcher .language-select {
+  color: var(--text-primary);
+  border-color: var(--border-default);
+  background: var(--bg-glass);
+}
+
 .login-card {
   width: 100%;
   max-width: 400px;

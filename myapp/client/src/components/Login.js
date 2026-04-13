@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import LanguageSwitcher from '../i18n/LanguageSwitcher';
+import useGoogleTranslate from '../i18n/useGoogleTranslate';
 import './Login.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -12,6 +14,7 @@ export default function Login({ onLogin }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { language, setLanguage, supportedLanguages } = useGoogleTranslate();
 
   // ── Keyboard logic ──────────────────────────────────────────────────
   const handleNum = (num) => {
@@ -47,6 +50,13 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="login-wrapper">
+      <div className="login-language-switcher">
+        <LanguageSwitcher
+          language={language}
+          setLanguage={setLanguage}
+          supportedLanguages={supportedLanguages}
+        />
+      </div>
       <div className="login-card glass-card">
         <div className="login-header">
           <span className="brand-icon">🧋</span>
