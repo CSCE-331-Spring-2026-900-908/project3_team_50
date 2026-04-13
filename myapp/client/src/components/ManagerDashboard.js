@@ -56,10 +56,10 @@ export default function ManagerDashboard() {
           <span className="manager-card-cta">Open Page</span>
         </Link>
 
-        <div className="manager-card active-card">
-          <h2>Weather Service</h2>
-          <p>Current College Station weather is shown below.</p>
-          <span className="manager-card-cta">Live Widget</span>
+        <div className="manager-card disabled-card">
+          <h2>Employee Management</h2>
+          <p>In progress.</p>
+          <span className="manager-card-cta muted">Coming Next</span>
         </div>
 
         <div className="manager-card disabled-card">
@@ -114,13 +114,6 @@ export default function ManagerDashboard() {
               <div className="weather-detail-item">
                 <span className="weather-detail-label">Wind Speed</span>
                 <span className="weather-detail-value">{weather.windSpeed} mph</span>
-              </div>
-
-              <div className="weather-detail-item">
-                <span className="weather-detail-label">Coordinates</span>
-                <span className="weather-detail-value">
-                  {weather.latitude.toFixed(2)}, {weather.longitude.toFixed(2)}
-                </span>
               </div>
             </div>
           </div>

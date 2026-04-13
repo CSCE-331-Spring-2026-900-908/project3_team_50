@@ -76,7 +76,7 @@
   background: var(--bg-surface);
   border-radius: var(--radius-lg);
   padding: 22px;
-  min-height: 260px;
+  min-height: 220px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -98,7 +98,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 160px;
+  min-height: 140px;
   border-radius: var(--radius-lg);
   background: rgba(91, 44, 160, 0.04);
 }
