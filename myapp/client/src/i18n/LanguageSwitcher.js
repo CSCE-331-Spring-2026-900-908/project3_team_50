@@ -17,7 +17,7 @@ function LanguageSwitcher({ language, setLanguage, supportedLanguages, isTransla
           </option>
         ))}
       </select>
-      {isTranslating && <span className="language-loading">Translating...</span>}
+      {isTranslating && language !== 'en' && <span className="language-loading">Translating...</span>}
       <div id="google_translate_element" className="google-translate-hidden" />
     </div>
   );

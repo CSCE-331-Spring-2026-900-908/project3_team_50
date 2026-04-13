@@ -4,6 +4,7 @@ import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
 import InventoryManagement from './components/InventoryManagement';
+import ReportsPanel from './components/ReportsPanel';
 import ManagerDashboard from './components/ManagerDashboard';
 import Login from './components/Login';
 import Kiosk from './components/Kiosk';
@@ -248,6 +249,10 @@ function App() {
             <Route
               path="/inventory-management"
               element={isManager ? <InventoryManagement /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/reports"
+              element={isManager ? <ReportsPanel /> : <Navigate to="/" replace />}
             />
           </Routes>
         </main>

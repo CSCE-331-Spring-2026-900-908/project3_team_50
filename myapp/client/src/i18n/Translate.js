@@ -149,6 +149,12 @@ export default function useGoogleTranslate() {
 
   useEffect(() => {
     localStorage.setItem('preferredLanguage', language);
+    if (language === 'en') {
+      applyLanguage(language);
+      setIsTranslating(false);
+      return undefined;
+    }
+
     setIsTranslating(true);
 
     const timeoutId = window.setTimeout(() => {
@@ -160,7 +166,7 @@ export default function useGoogleTranslate() {
       if (applied) {
         window.clearInterval(intervalId);
         // Translation updates are async; keep spinner briefly for feedback.
-        window.setTimeout(() => setIsTranslating(false), 700);
+        window.setTimeout(() => setIsTranslating(false), 300);
       }
     }, 300);
 

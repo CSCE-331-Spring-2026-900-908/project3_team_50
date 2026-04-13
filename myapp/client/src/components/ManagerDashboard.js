@@ -62,11 +62,11 @@ export default function ManagerDashboard() {
           <span className="manager-card-cta muted">Coming Next</span>
         </div>
 
-        <div className="manager-card disabled-card">
+        <Link to="/reports" className="manager-card active-card">
           <h2>Reports</h2>
-          <p>In progress.</p>
-          <span className="manager-card-cta muted">Coming Next</span>
-        </div>
+          <p>Sales, inventory, X/Z reports, and custom SQL queries.</p>
+          <span className="manager-card-cta">Open Page</span>
+        </Link>
       </div>
 
       <div className="weather-dashboard-panel">
