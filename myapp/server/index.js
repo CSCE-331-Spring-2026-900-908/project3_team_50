@@ -4,7 +4,10 @@ const { Pool } = require('pg');
 const dotenv = require('dotenv');
 const path = require('path');
 
-// Load .env specifically from the server directory
+// Load existing root .env first
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+// Then load server-specific .env for backend-only secrets
 dotenv.config({ path: path.join(__dirname, '.env') });
 
 // ── Express setup ──────────────────────────────────────────────────────
