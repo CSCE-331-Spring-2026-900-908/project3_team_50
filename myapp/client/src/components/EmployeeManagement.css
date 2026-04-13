@@ -8,10 +8,27 @@
   margin: 0 auto;
 }
 
-.pin-cell {
-  font-family: ui-monospace, monospace;
-  letter-spacing: 0.15em;
+.employee-mgmt .mgmt-header .employee-mgmt-title-block {
+  flex: 1;
+  min-width: 200px;
+}
+
+.employee-mgmt-title-block h1 {
+  margin: 0;
+}
+
+.employee-mgmt-hint {
+  margin: 6px 0 0;
+  font-size: 0.8rem;
   color: var(--text-muted);
+  max-width: 42rem;
+  line-height: 1.4;
+}
+
+.pin-cell {
+  font-family: ui-monospace, 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
 }
 
 .modal-card select {

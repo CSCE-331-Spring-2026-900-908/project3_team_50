@@ -161,7 +161,12 @@ export default function EmployeeManagement() {
   return (
     <div className="employee-mgmt">
       <div className="mgmt-header">
-        <h1>Employee Management</h1>
+        <div className="employee-mgmt-title-block">
+          <h1>Employee Management</h1>
+          <p className="employee-mgmt-hint">
+            Manager-only: PINs are listed below so you can verify or share credentials with staff.
+          </p>
+        </div>
         <Link className="action-btn back-link-btn" to="/manager-dashboard">
           ← Back to Dashboard
         </Link>
@@ -204,7 +209,7 @@ export default function EmployeeManagement() {
                     <span className="cat-chip">{emp.role}</span>
                   </td>
                   <td className="price-cell">${Number(emp.hourly_rate).toFixed(2)}</td>
-                  <td className="pin-cell">••••</td>
+                  <td className="pin-cell">{emp.pin != null && emp.pin !== '' ? String(emp.pin) : '—'}</td>
                 </tr>
               ))
             )}
