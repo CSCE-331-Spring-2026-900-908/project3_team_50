@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
 import './Login.css';
@@ -17,6 +17,26 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
   const [googleEmail, setGoogleEmail] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if typing in a standard input
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+
+      if (/^[0-9]$/.test(e.key)) {
+        setPin((prev) => prev.length < 8 ? prev + e.key : prev);
+      } else if (e.key === 'Backspace') {
+        setPin((prev) => prev.slice(0, -1));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        // Trigger a real click to avoid React stale-closure bugs inside this listener
+        document.getElementById('login-submit-btn')?.click();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleGoogleLogin = async (credentialResponse) => {
     console.log("Google token:", credentialResponse.credential);
@@ -143,6 +163,7 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
               0
             </button>
             <button
+              id="login-submit-btn"
               type="submit"
               className="pin-btn action-btn enter"
               disabled={isLoading || pin.length === 0}
