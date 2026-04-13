@@ -8,6 +8,7 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
    Cashier Dashboard — POS view
    Translates CashierDashboard.java to React
    ═══════════════════════════════════════════════════════════════════════ */
+   
 export default function CashierDashboard() {
   // ── State ──────────────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);

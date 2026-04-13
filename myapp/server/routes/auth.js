@@ -91,6 +91,8 @@ router.post('/customer-lookup', async (req, res) => {
           last_name: customer.cus_lname,
           email: customer.email,
           phone: customer.phone_number,
+          points: customer.points || 0,
+          past_orders: customer.past_orders || '',
         },
         missingField,
       });
@@ -168,6 +170,70 @@ router.post('/register-customer', async (req, res) => {
   } catch (err) {
     console.error('Register customer error:', err.message);
     res.status(500).json({ error: 'Database error during registration: ' + err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PATCH /api/auth/customer/:customerId
+//  → Update customer points and past_orders
+//
+//  Body:
+//  {
+//    points: 150,
+//    past_order_id: 456
+//  }
+// ═══════════════════════════════════════════════════════════════════════
+router.patch('/customer/:customerId', async (req, res) => {
+  const pool = req.app.locals.pool;
+  const { customerId } = req.params;
+  const { points, past_order_id } = req.body;
+
+  try {
+    let updateQuery = 'UPDATE customer SET ';
+    const params = [];
+    const updates = [];
+
+    if (points !== undefined) {
+      updates.push(`points = $${params.length + 1}`);
+      params.push(points);
+    }
+
+    if (past_order_id !== undefined) {
+      // Get current past_orders and prepend the new order ID
+      const customerRes = await pool.query(
+        'SELECT past_orders FROM customer WHERE cus_id = $1',
+        [customerId]
+      );
+
+      if (customerRes.rows.length > 0) {
+        const currentPastOrders = customerRes.rows[0].past_orders || '';
+        let ordersList = currentPastOrders ? currentPastOrders.split(',').map(id => id.trim()) : [];
+        ordersList = [past_order_id.toString(), ...ordersList].slice(0, 3);
+        const updatedPastOrders = ordersList.join(',');
+
+        updates.push(`past_orders = $${params.length + 1}`);
+        params.push(updatedPastOrders);
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    updates.push(`cus_id = $${params.length + 1}`);
+    params.push(customerId);
+
+    updateQuery += updates.slice(0, -1).join(', ') + ' WHERE cus_id = $' + params.length;
+
+    const result = await pool.query(updateQuery, params.slice(0, -1).concat(customerId));
+
+    res.json({
+      success: true,
+      message: 'Customer updated',
+    });
+  } catch (err) {
+    console.error('Update customer error:', err.message);
+    res.status(500).json({ error: 'Database error: ' + err.message });
   }
 });
 
