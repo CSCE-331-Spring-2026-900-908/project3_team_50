@@ -2,9 +2,10 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
+const path = require('path');
 
-// Load .env from the server directory
-dotenv.config();
+// Load .env specifically from the server directory
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // ── Express setup ──────────────────────────────────────────────────────
 const app = express();

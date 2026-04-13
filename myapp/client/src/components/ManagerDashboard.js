@@ -10,55 +10,31 @@ export default function ManagerDashboard() {
   const [weatherError, setWeatherError] = useState('');
 
   useEffect(() => {
-    const fetchCurrentLocationWeather = () => {
-      if (!navigator.geolocation) {
-        setWeatherError('Geolocation is not supported by this browser.');
-        setWeatherLoading(false);
-        return;
-      }
+    const fetchCollegeStationWeather = async () => {
+      try {
+        setWeatherLoading(true);
+        setWeatherError('');
 
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          try {
-            const { latitude, longitude } = position.coords;
+        const response = await fetch(
+          `${API}/weather?city=${encodeURIComponent('College Station')}`
+        );
 
-            const response = await fetch(
-              `${API}/weather/current?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`
-            );
+        const data = await response.json();
 
-            const data = await response.json();
-
-            if (!response.ok) {
-              throw new Error(data.error || 'Failed to fetch weather data.');
-            }
-
-            setWeather(data);
-            setWeatherError('');
-          } catch (err) {
-            setWeather(null);
-            setWeatherError(err.message || 'Unable to fetch local weather.');
-          } finally {
-            setWeatherLoading(false);
-          }
-        },
-        (error) => {
-          let message = 'Unable to retrieve your location.';
-
-          if (error.code === 1) {
-            message = 'Location access was denied. Please allow location access and refresh.';
-          } else if (error.code === 2) {
-            message = 'Your location is unavailable right now.';
-          } else if (error.code === 3) {
-            message = 'Location request timed out. Please refresh and try again.';
-          }
-
-          setWeatherError(message);
-          setWeatherLoading(false);
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch weather data.');
         }
-      );
+
+        setWeather(data);
+      } catch (err) {
+        setWeather(null);
+        setWeatherError(err.message || 'Unable to fetch College Station weather.');
+      } finally {
+        setWeatherLoading(false);
+      }
     };
 
-    fetchCurrentLocationWeather();
+    fetchCollegeStationWeather();
   }, []);
 
   return (
@@ -82,7 +58,7 @@ export default function ManagerDashboard() {
 
         <div className="manager-card active-card">
           <h2>Weather Service</h2>
-          <p>Current local weather is shown below.</p>
+          <p>Current College Station weather is shown below.</p>
           <span className="manager-card-cta">Live Widget</span>
         </div>
 
@@ -95,8 +71,8 @@ export default function ManagerDashboard() {
 
       <div className="weather-dashboard-panel">
         <div className="weather-dashboard-header">
-          <h2>Current Local Weather</h2>
-          <p>Based on your current browser location.</p>
+          <h2>Current Weather in College Station</h2>
+          <p>Live weather data from OpenWeather.</p>
         </div>
 
         {weatherLoading && (
