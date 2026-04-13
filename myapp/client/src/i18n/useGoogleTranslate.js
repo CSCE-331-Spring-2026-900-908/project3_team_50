@@ -2,22 +2,46 @@ import { useEffect, useState } from 'react';
 
 const TRANSLATE_SCRIPT_ID = 'google-translate-script';
 
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', label: 'English' },
-  { code: 'es', label: 'Spanish' },
-  { code: 'fr', label: 'French' },
-  { code: 'de', label: 'German' },
-  { code: 'zh-CN', label: 'Chinese (Simplified)' },
-  { code: 'ar', label: 'Arabic' },
-  { code: 'hi', label: 'Hindi' },
-  { code: 'ko', label: 'Korean' },
-  { code: 'ja', label: 'Japanese' },
-];
+const DEFAULT_LANGUAGES = [{ code: 'en', label: 'English' }];
 
 export default function useGoogleTranslate() {
   const [language, setLanguage] = useState(localStorage.getItem('preferredLanguage') || 'en');
+  const [supportedLanguages, setSupportedLanguages] = useState(DEFAULT_LANGUAGES);
 
   useEffect(() => {
+    const syncLanguagesFromGoogleWidget = () => {
+      const combo = document.querySelector('.goog-te-combo');
+      if (!combo || !combo.options) {
+        return false;
+      }
+
+      const options = Array.from(combo.options)
+        .filter((option) => option.value)
+        .map((option) => ({
+          code: option.value,
+          label: option.textContent || option.value,
+        }));
+
+      if (options.length > 0) {
+        setSupportedLanguages(options);
+        return true;
+      }
+
+      return false;
+    };
+
+    const waitForLanguageOptions = () => {
+      let attempts = 0;
+      const maxAttempts = 40;
+      const intervalId = window.setInterval(() => {
+        attempts += 1;
+        const loaded = syncLanguagesFromGoogleWidget();
+        if (loaded || attempts >= maxAttempts) {
+          window.clearInterval(intervalId);
+        }
+      }, 250);
+    };
+
     const initGoogleTranslate = () => {
       if (!window.google || !window.google.translate) {
         return;
@@ -34,12 +58,13 @@ export default function useGoogleTranslate() {
           {
             pageLanguage: 'en',
             autoDisplay: false,
-            includedLanguages: SUPPORTED_LANGUAGES.map((lang) => lang.code).join(','),
             layout: window.google.translate.TranslateElement.InlineLayout.SIMPLE,
           },
           'google_translate_element'
         );
       }
+
+      waitForLanguageOptions();
     };
 
     window.googleTranslateElementInit = initGoogleTranslate;
@@ -74,5 +99,5 @@ export default function useGoogleTranslate() {
     return () => window.clearInterval(intervalId);
   }, [language]);
 
-  return { language, setLanguage, supportedLanguages: SUPPORTED_LANGUAGES };
+  return { language, setLanguage, supportedLanguages };
 }
