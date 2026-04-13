@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
 import './Login.css';
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -11,8 +13,58 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
    ═══════════════════════════════════════════════════════════════════════ */
 export default function Login({ onLogin, language, setLanguage, supportedLanguages, isTranslating }) {
   const [pin, setPin] = useState('');
+  const [isBinding, setIsBinding] = useState(false);
+  const [googleEmail, setGoogleEmail] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if typing in a standard input
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+
+      if (/^[0-9]$/.test(e.key)) {
+        setPin((prev) => prev.length < 8 ? prev + e.key : prev);
+      } else if (e.key === 'Backspace') {
+        setPin((prev) => prev.slice(0, -1));
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        // Trigger a real click to avoid React stale-closure bugs inside this listener
+        document.getElementById('login-submit-btn')?.click();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    console.log("Google token:", credentialResponse.credential);
+    const decoded = jwtDecode(credentialResponse.credential);
+    const email = decoded.email;
+    setGoogleEmail(email);
+    setIsLoading(true);
+
+    try {
+      // 1. Try to log them in directly using the email
+      const res = await axios.post(`${API}/auth/google-login`, { email });
+      if (res.data.success) {
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        onLogin(res.data.user);
+      }
+    } catch (err) {
+      // 2. If it fails (e.g. 404 unbound), force them to bind!
+      setIsBinding(true);
+      setError('Email not recognized. Please link your PIN.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    console.log("Google login failed");
+    setError("Google login failed");
+  };
 
   // ── Keyboard logic ──────────────────────────────────────────────────
   const handleNum = (num) => {
@@ -32,14 +84,24 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
     setError('');
 
     try {
-      const res = await axios.post(`${API}/auth/login`, { pin });
-      if (res.data.success) {
-        
-        localStorage.setItem('user', JSON.stringify(res.data.user));
-        onLogin(res.data.user);
+      if (isBinding) {
+        const res = await axios.post(`${API}/auth/bind`, { email: googleEmail, pin });
+        if (res.data.status === "success") {
+          alert("Google account bound successfully!");
+          setIsBinding(false);
+          setPin('');
+        }
+      } else {
+        const res = await axios.post(`${API}/auth/login`, { pin });
+        if (res.data.success) {
+
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+          onLogin(res.data.user);
+        }
       }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+    }
+    catch (err) {
+      setError(err.response?.data?.error || err.response?.data?.message || 'Login failed');
       setPin('');
     } finally {
       setIsLoading(false);
@@ -59,8 +121,12 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
       <div className="login-card glass-card">
         <div className="login-header">
           <span className="brand-icon">🧋</span>
-          <h1>Boba POS Login</h1>
-          <p>Please enter your employee PIN</p>
+          <h1>{isBinding ? "Link Account" : "Boba POS Login"}</h1>
+          <p>
+            {isBinding
+              ? `Enter your PIN to link ${googleEmail}`
+              : "Please enter your employee PIN or sign in with Google"}
+          </p>
         </div>
 
         {error && <div className="login-error">{error}</div>}
@@ -97,6 +163,7 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
               0
             </button>
             <button
+              id="login-submit-btn"
               type="submit"
               className="pin-btn action-btn enter"
               disabled={isLoading || pin.length === 0}
@@ -105,6 +172,35 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
             </button>
           </div>
         </form>
+        {!isBinding ? (
+          <div className="google-login-container">
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={handleGoogleError}
+            />
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <button 
+              type="button" 
+              onClick={() => {
+                setIsBinding(false);
+                setError('');
+                setPin('');
+              }}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#888',
+                cursor: 'pointer',
+                textDecoration: 'underline',
+                fontSize: '1rem'
+              }}
+            >
+              Cancel and Return to Login
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
