@@ -31,6 +31,10 @@
   background: var(--bg-glass);
 }
 
+.login-language-switcher .language-loading {
+  color: var(--text-secondary);
+}
+
 .login-card {
   width: 100%;
   max-width: 400px;

@@ -9,15 +9,13 @@ export default function WeatherService() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const key = process.env.REACT_APP_WEATHER_KEY;
-
     const fetchWeather = async () => {
         try {
             setLoading(true);
             setError('');
 
             const response = await fetch(
-                `${API}/weather?city=${encodeURIComponent(city)}&key=${encodeURIComponent(key)}`
+                `${API}/weather?city=${encodeURIComponent(city)}`
             );
 
             const data = await response.json();

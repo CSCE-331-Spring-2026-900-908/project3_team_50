@@ -110,7 +110,21 @@
   color: #111111;
 }
 
-.google-translate-hidden,
+.language-loading {
+  font-size: .72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.google-translate-hidden {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .skiptranslate,
 #goog-gt-tt,
 .goog-te-banner-frame {
