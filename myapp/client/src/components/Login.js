@@ -6,6 +6,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const GOOGLE_CLIENT_CONFIGURED = Boolean((process.env.REACT_APP_GOOGLE_CLIENT_ID || '').trim());
 
 /* ═══════════════════════════════════════════════════════════════════════
    Login Screen (PIN Pad)
@@ -15,6 +16,7 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
   const [pin, setPin] = useState('');
   const [isBinding, setIsBinding] = useState(false);
   const [googleEmail, setGoogleEmail] = useState('');
+  const [googleCredential, setGoogleCredential] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,31 +41,36 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
   }, []);
 
   const handleGoogleLogin = async (credentialResponse) => {
-    console.log("Google token:", credentialResponse.credential);
-    const decoded = jwtDecode(credentialResponse.credential);
+    const credential = credentialResponse.credential;
+    setGoogleCredential(credential);
+    const decoded = jwtDecode(credential);
     const email = decoded.email;
     setGoogleEmail(email);
     setIsLoading(true);
 
     try {
-      // 1. Try to log them in directly using the email
-      const res = await axios.post(`${API}/auth/google-login`, { email });
+      const res = await axios.post(`${API}/auth/google-login`, { credential });
       if (res.data.success) {
         localStorage.setItem('user', JSON.stringify(res.data.user));
         onLogin(res.data.user);
       }
     } catch (err) {
-      // 2. If it fails (e.g. 404 unbound), force them to bind!
-      setIsBinding(true);
-      setError('Email not recognized. Please link your PIN.');
+      if (err.response?.status === 404) {
+        setIsBinding(true);
+        setError('No account linked to this Google email. Enter your employee PIN to link.');
+      } else {
+        setError(
+          err.response?.data?.error || err.response?.data?.message || 'Google sign-in failed'
+        );
+        setGoogleCredential('');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleError = () => {
-    console.log("Google login failed");
-    setError("Google login failed");
+    setError('Google sign-in failed');
   };
 
   // ── Keyboard logic ──────────────────────────────────────────────────
@@ -85,11 +92,18 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
 
     try {
       if (isBinding) {
-        const res = await axios.post(`${API}/auth/bind`, { email: googleEmail, pin });
-        if (res.data.status === "success") {
-          alert("Google account bound successfully!");
+        if (!googleCredential) {
+          setError('Google session expired. Please sign in with Google again.');
+          setIsBinding(false);
+          return;
+        }
+        const res = await axios.post(`${API}/auth/bind`, { credential: googleCredential, pin });
+        if (res.data.status === 'success' && res.data.user) {
+          localStorage.setItem('user', JSON.stringify(res.data.user));
+          onLogin(res.data.user);
           setIsBinding(false);
           setPin('');
+          setGoogleCredential('');
         }
       } else {
         const res = await axios.post(`${API}/auth/login`, { pin });
@@ -125,7 +139,9 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
           <p>
             {isBinding
               ? `Enter your PIN to link ${googleEmail}`
-              : "Please enter your employee PIN or sign in with Google"}
+              : GOOGLE_CLIENT_CONFIGURED
+                ? 'Please enter your employee PIN or sign in with Google'
+                : 'Please enter your employee PIN'}
           </p>
         </div>
 
@@ -172,14 +188,14 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
             </button>
           </div>
         </form>
-        {!isBinding ? (
+        {!isBinding && GOOGLE_CLIENT_CONFIGURED ? (
           <div className="google-login-container">
             <GoogleLogin
               onSuccess={handleGoogleLogin}
               onError={handleGoogleError}
             />
           </div>
-        ) : (
+        ) : !isBinding ? null : (
           <div style={{ textAlign: 'center', marginTop: '1rem' }}>
             <button 
               type="button" 
@@ -187,6 +203,7 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
                 setIsBinding(false);
                 setError('');
                 setPin('');
+                setGoogleCredential('');
               }}
               style={{
                 background: 'none',

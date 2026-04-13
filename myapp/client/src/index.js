@@ -5,14 +5,26 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
-const clientID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const clientID = (process.env.REACT_APP_GOOGLE_CLIENT_ID || '').trim();
+
+if (!clientID) {
+  // CRA inlines REACT_APP_* at build time; server/.env is not read by the client.
+  console.error(
+    'Missing REACT_APP_GOOGLE_CLIENT_ID. Add it to myapp/client/.env locally, ' +
+      'or set it in your host (e.g. Render Static Site) and rebuild.'
+  );
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <GoogleOAuthProvider clientId={clientID}>
+    {clientID ? (
+      <GoogleOAuthProvider clientId={clientID}>
+        <App />
+      </GoogleOAuthProvider>
+    ) : (
       <App />
-    </GoogleOAuthProvider>
+    )}
   </React.StrictMode>
 );
 

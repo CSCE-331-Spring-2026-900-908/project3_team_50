@@ -1,5 +1,47 @@
 const express = require('express');
+const { OAuth2Client } = require('google-auth-library');
 const router = express.Router();
+
+let googleEmailColumnReady = false;
+
+async function ensureGoogleEmailColumn(pool) {
+  if (googleEmailColumnReady) return;
+  await pool.query(`
+    ALTER TABLE employees ADD COLUMN IF NOT EXISTS google_email VARCHAR(255);
+  `);
+  await pool.query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_employees_google_email_lower
+    ON employees (LOWER(TRIM(google_email)))
+    WHERE google_email IS NOT NULL AND TRIM(google_email) <> '';
+  `);
+  googleEmailColumnReady = true;
+}
+
+function getGoogleClientId() {
+  return process.env.GOOGLE_CLIENT_ID || process.env.REACT_APP_GOOGLE_CLIENT_ID;
+}
+
+async function getEmailFromGoogleCredential(credential) {
+  const clientId = getGoogleClientId();
+  if (!clientId || !credential) {
+    return null;
+  }
+  const client = new OAuth2Client(clientId);
+  const ticket = await client.verifyIdToken({
+    idToken: credential,
+    audience: clientId,
+  });
+  const payload = ticket.getPayload();
+  return payload.email || null;
+}
+
+function userRowToClient(row) {
+  return {
+    id: row.employee_id,
+    name: row.name,
+    role: row.role,
+  };
+}
 
 // ═══════════════════════════════════════════════════════════════════════
 //  POST /api/auth/login
@@ -37,6 +79,114 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Database error during authentication' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+//  POST /api/auth/google-login
+//  Body: { credential: "<Google ID token JWT>" }
+//  Verifies JWT with Google, looks up employees.google_email, returns same user shape as /login
+// ═══════════════════════════════════════════════════════════════════════
+router.post('/google-login', async (req, res) => {
+  const pool = req.app.locals.pool;
+  const { credential } = req.body;
+
+  if (!credential) {
+    return res.status(400).json({ error: 'Google credential is required' });
+  }
+
+  try {
+    await ensureGoogleEmailColumn(pool);
+    const email = await getEmailFromGoogleCredential(credential);
+    if (!email) {
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    const result = await pool.query(
+      `SELECT employee_id, role, name, google_email
+       FROM employees
+       WHERE LOWER(TRIM(COALESCE(google_email, ''))) = LOWER(TRIM($1))`,
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No employee linked to this Google account' });
+    }
+
+    const user = result.rows[0];
+    res.json({
+      success: true,
+      user: userRowToClient(user),
+    });
+  } catch (err) {
+    console.error('Google login error:', err);
+    if (err.message && err.message.includes('Token used too late')) {
+      return res.status(401).json({ error: 'Google session expired. Please sign in again.' });
+    }
+    res.status(500).json({ error: 'Google authentication failed' });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+//  POST /api/auth/bind
+//  Body: { credential: "<Google ID token>", pin: "1234" }
+//  Verifies PIN, then stores google_email from verified JWT on that employee
+// ═══════════════════════════════════════════════════════════════════════
+router.post('/bind', async (req, res) => {
+  const pool = req.app.locals.pool;
+  const { credential, pin } = req.body;
+
+  if (!credential || pin === undefined || pin === null || pin === '') {
+    return res.status(400).json({ error: 'Google credential and PIN are required' });
+  }
+
+  try {
+    await ensureGoogleEmailColumn(pool);
+    const email = await getEmailFromGoogleCredential(credential);
+    if (!email) {
+      return res.status(401).json({ error: 'Invalid Google token' });
+    }
+
+    const empResult = await pool.query(
+      'SELECT employee_id, role, name FROM employees WHERE pin = $1',
+      [String(pin)]
+    );
+
+    if (empResult.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid PIN' });
+    }
+
+    const employee = empResult.rows[0];
+
+    const conflict = await pool.query(
+      `SELECT employee_id FROM employees
+       WHERE LOWER(TRIM(COALESCE(google_email, ''))) = LOWER(TRIM($1))
+         AND employee_id <> $2`,
+      [email, employee.employee_id]
+    );
+
+    if (conflict.rows.length > 0) {
+      return res.status(409).json({
+        error: 'This Google account is already linked to another employee',
+      });
+    }
+
+    await pool.query(
+      'UPDATE employees SET google_email = $1 WHERE employee_id = $2',
+      [email.trim(), employee.employee_id]
+    );
+
+    res.json({
+      status: 'success',
+      success: true,
+      user: userRowToClient(employee),
+    });
+  } catch (err) {
+    console.error('Bind error:', err);
+    if (err.code === '23505') {
+      return res.status(409).json({ error: 'This Google account is already linked' });
+    }
+    res.status(500).json({ error: 'Failed to link Google account' });
   }
 });
 
