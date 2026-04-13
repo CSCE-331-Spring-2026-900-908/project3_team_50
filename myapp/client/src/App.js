@@ -4,6 +4,7 @@ import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
 import InventoryManagement from './components/InventoryManagement';
+import EmployeeManagement from './components/EmployeeManagement';
 import ReportsPanel from './components/ReportsPanel';
 import ManagerDashboard from './components/ManagerDashboard';
 import Login from './components/Login';
@@ -11,7 +12,6 @@ import Kiosk from './components/Kiosk';
 import LanguageSwitcher from './i18n/LanguageSwitcher';
 import useGoogleTranslate from './i18n/Translate';
 import './App.css';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -250,6 +250,10 @@ function App() {
             <Route
               path="/inventory-management"
               element={isManager ? <InventoryManagement /> : <Navigate to="/" replace />}
+            />
+            <Route
+              path="/employee-management"
+              element={isManager ? <EmployeeManagement /> : <Navigate to="/" replace />}
             />
             <Route
               path="/reports"

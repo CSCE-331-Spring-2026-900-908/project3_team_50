@@ -37,6 +37,7 @@ const orderRoutes = require('./routes/orders');
 const inventoryRoutes = require('./routes/inventory');
 const weatherRoutes = require('./routes/weather');
 const reportsRoutes = require('./routes/reports');
+const employeesRoutes = require('./routes/employees');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
@@ -44,6 +45,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/weather', weatherRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/employees', employeesRoutes);
 
 // Health-check endpoint
 app.get('/api/health', async (req, res) => {

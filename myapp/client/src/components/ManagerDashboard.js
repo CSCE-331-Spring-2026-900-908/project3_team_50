@@ -56,11 +56,11 @@ export default function ManagerDashboard() {
           <span className="manager-card-cta">Open Page</span>
         </Link>
 
-        <div className="manager-card disabled-card">
+        <Link to="/employee-management" className="manager-card active-card">
           <h2>Employee Management</h2>
-          <p>In progress.</p>
-          <span className="manager-card-cta muted">Coming Next</span>
-        </div>
+          <p>View, add, update, and manage employees.</p>
+          <span className="manager-card-cta">Open Page</span>
+        </Link>
 
         <Link to="/reports" className="manager-card active-card">
           <h2>Reports</h2>

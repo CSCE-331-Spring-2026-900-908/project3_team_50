@@ -1,0 +1,25 @@
+@import './MenuManagement.css';
+
+.employee-mgmt {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pin-cell {
+  font-family: ui-monospace, monospace;
+  letter-spacing: 0.15em;
+  color: var(--text-muted);
+}
+
+.modal-card select {
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+}
