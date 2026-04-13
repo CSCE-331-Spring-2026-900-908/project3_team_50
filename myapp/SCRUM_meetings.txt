@@ -181,3 +181,53 @@ Minutes:
     Start doing accessibility features and adding images to menu items to make the application more user friendly.
     Start customer info. 
 
+04/8/2026 Meeting 5
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+
+Meeting Agenda Items:
+    Updates on Sprint 2 Tasks
+    What do we need for the next demonstration
+
+Updates:
+    Progress made on drink images. Still working out the kinks
+    Customer accounts are set up and working for the most part, still need to add point system and point payment
+    Weather API progress started
+
+Tasks Completed:
+    Task Description: Customer Accounts for above and beyond feature
+    Assigned to: Mason
+    Completed? (yes/no): Yes
+
+    Task Description: Add images to menu items
+    Assigned to: Britton
+    Completed? (yes/no): No
+
+    Task Description: Start Machine Translation for Accessibility Features
+    Assigned to: Michael
+    Completed? (yes/no): No
+
+    Task Description: Add more functionality to inventory management system based on user studies and feedback
+    Assigned to: Gavin      
+    Completed? (yes/no): Yes
+
+Before The Next Meeting
+Plans:
+    Finish up the remaining tasks for sprint 2. We need bare minimum the weather API
+    Images can be wrapped soon so we need to start on translation fetures. Above and beyond features can be wrapped soon. 
+
+Task Assignments:
+    Task Description: Add images to menu items
+    Assigned to: Britton
+    
+    Task Description: Start Machine Translation for Accessibility Features
+    Assigned to: Michael    
+
+    Task Description: Add point system and point payment to customer accounts
+    Assigned to: Mason  
+
+Minutes:
+    We have had a slow start. this is the most important sprint and we dont have any meaningful API features. 
+    We need to get the weather API working and add images to menu items.
+    We also need to start on the accessibility features, as that is a big part of our project
+    We need to finish the above and beyond features.
+    

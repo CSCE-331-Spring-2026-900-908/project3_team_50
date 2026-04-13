@@ -43,6 +43,10 @@ export default function Kiosk() {
   const [nameModalTitle, setNameModalTitle] = useState('');
   const [tempFirstName, setTempFirstName] = useState('');
   const [tempLastName, setTempLastName] = useState('');
+  const [customerPoints, setCustomerPoints] = useState(0);
+  const [pastOrders, setPastOrders] = useState([]);
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const [reorderedOrderId, setReorderedOrderId] = useState(null);
 
   
   const subtotal = orderItems.reduce(
@@ -122,6 +126,10 @@ export default function Kiosk() {
       setCustomerLastName('');
       setCustomerEmail('');
       setCustomerPhone('');
+      setCustomerPoints(0);
+      setPastOrders([]);
+      setPointsToUse(0);
+      setReorderedOrderId(null);
       setOrderItems([]);
       setActiveCategory(null);
       setTip(0);
@@ -185,23 +193,52 @@ export default function Kiosk() {
     }
   };
 
-  const handleCheckout = async (customerName) => {
+  const handleCheckout = async (customerName, discountApplied = false) => {
     if (orderItems.length === 0) return;
     setIsProcessing(true);
     try {
-      await axios.post(`${API}/orders`, {
+      // Calculate discount amount (10 points = $1)
+      const discountAmount = pointsToUse * 0.1;
+      const finalTotal = Math.max(0, subtotal - discountAmount + tip);
+
+      const checkoutRes = await axios.post(`${API}/orders`, {
         cashier_name: 'Walk-in',
         customer_name: customerName || 'Walk-in',
-        total: subtotal,
+        customer_id: customerId || null,
+        total: finalTotal,
+        subtotal: subtotal,
         tip,
+        points_used: pointsToUse,
+        discount_applied: discountApplied,
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,
         })),
       });
+
+      // If customer account used, update points and past orders
+      if (customerId) {
+        const orderId = checkoutRes.data.order_id;
+        const earnedPoints = discountApplied ? 0 : Math.floor(subtotal);
+        const newPoints = Math.max(0, customerPoints - pointsToUse + earnedPoints);
+        
+        // Update customer points and past orders
+        await axios.patch(`${API}/auth/customer/${customerId}`, {
+          points: newPoints,
+          past_order_id: orderId,
+        });
+        
+        setCustomerPoints(newPoints);
+        setPastOrders([orderId, ...pastOrders].slice(0, 3));
+      }
+
       // Reset
       setOrderItems([]);
       setTip(0);
+      setPointsToUse(0);
+      setReorderedOrderId(null);
+      setCustomerPoints(0);
+      setPastOrders([]);
       setView('CUSTOMER_INFO');
       setCustomerFirstName('');
       setCustomerLastName('');
@@ -240,6 +277,13 @@ export default function Kiosk() {
         setCustomerId(customer.cus_id);
         setCustomerFirstName(customer.first_name || '');
         setCustomerLastName(customer.last_name || '');
+        setCustomerPoints(customer.points || 0);
+        
+        // Parse past orders
+        if (customer.past_orders) {
+          const orderIds = customer.past_orders.split(',').map(id => id.trim()).filter(id => id !== '');
+          setPastOrders(orderIds);
+        }
 
         if (missingField && missingField !== 'none') {
           
@@ -290,6 +334,8 @@ export default function Kiosk() {
       setCustomerId(registerRes.data.customer_id);
       setCustomerFirstName(tempFirstName);
       setCustomerLastName(tempLastName);
+      setCustomerPoints(0);
+      setPastOrders([]);
       setShowNameModal(false);
       setView('CATEGORIES');
     } catch (err) {
@@ -299,6 +345,41 @@ export default function Kiosk() {
     }
   };
 
+  // ── Reorder handler ────────────────────────────────────────────────
+  const handleReorder = async (orderId) => {
+    // If clicking the same order again, toggle it off
+    if (reorderedOrderId === orderId) {
+      setOrderItems([]);
+      setReorderedOrderId(null);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Fetch order details
+      const orderRes = await axios.get(`${API}/orders/${orderId}`);
+      const orderData = orderRes.data;
+      
+      // Populate order items with fetched data
+      const newItems = orderData.items.map((item) => ({
+        baseItemId: item.baseItemId,
+        name: item.name,
+        basePrice: item.basePrice,
+        bobaInventoryId: item.bobaInventoryId || -1,
+        boba: item.boba || 'No Boba',
+        bobaPrice: item.bobaPrice || 0,
+        ice: item.ice || 'Regular Ice',
+        sweetness: item.sweetness || 'Regular Sweet',
+      }));
+
+      setOrderItems(newItems);
+      setReorderedOrderId(orderId);
+    } catch (err) {
+      alert('Failed to load order: ' + (err.response?.data?.error || err.message));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   
   return (
     <div className="kiosk-layout">
@@ -309,6 +390,9 @@ export default function Kiosk() {
             <div className="header-welcome">
               {customerFirstName && customerLastName && (
                 <span>Welcome, {customerFirstName}!</span>
+              )}
+              {customerPoints > 0 && (
+                <span className="header-points">💰 {customerPoints} points</span>
               )}
             </div>
             <button className="logout-btn-header" onClick={handleLogout}>
@@ -421,6 +505,10 @@ export default function Kiosk() {
               onPay={handleCheckout}
               onBack={() => setView('ITEMS')}
               isProcessing={isProcessing}
+              customerPoints={customerPoints}
+              pointsToUse={pointsToUse}
+              setPointsToUse={setPointsToUse}
+              customerId={customerId}
             />
           )}
         </div>
@@ -486,6 +574,25 @@ export default function Kiosk() {
           Checkout
         </button>
         </aside>
+
+        {/* ── BOTTOM LEFT: Past orders (for logged-in customers) ──────── */}
+        {customerId && pastOrders.length > 0 && (
+          <aside className="past-orders-panel glass-card">
+            <h3 className="sidebar-title">Past Orders</h3>
+            <div className="past-orders-list">
+              {pastOrders.map((orderId) => (
+                <button
+                  key={orderId}
+                  className={`past-order-btn ${reorderedOrderId === orderId ? 'active' : ''}`}
+                  onClick={() => handleReorder(orderId)}
+                >
+                  Order #{orderId}
+                  {reorderedOrderId === orderId && <span className="check-mark">✓</span>}
+                </button>
+              ))}
+            </div>
+          </aside>
+        )}
       </div>
     </div>
   );
@@ -589,14 +696,24 @@ function CheckoutPanel({
   onPay,
   onBack,
   isProcessing,
+  customerPoints = 0,
+  pointsToUse = 0,
+  setPointsToUse,
+  customerId,
 }) {
   const [customerName, setCustomerName] = useState('');
+  const [showPointsInput, setShowPointsInput] = useState(false);
+  const [pointsInput, setPointsInput] = useState('');
 
   const tipPresets = [
     { label: '10%', calc: subtotal * 0.1 },
     { label: '15%', calc: subtotal * 0.15 },
     { label: '20%', calc: subtotal * 0.2 },
   ];
+
+  const discountAmount = pointsToUse * 0.1;
+  const finalTotal = Math.max(0, subtotal - discountAmount + tip);
+  const pointsDiscountApplied = pointsToUse > 0;
 
   return (
     <div className="checkout-panel">
@@ -611,13 +728,19 @@ function CheckoutPanel({
           <span>Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
+        {pointsToUse > 0 && (
+          <div className="summary-row discount-row">
+            <span>Points Discount ({pointsToUse} pts)</span>
+            <span>-${discountAmount.toFixed(2)}</span>
+          </div>
+        )}
         <div className="summary-row">
           <span>Tip</span>
           <span>${tip.toFixed(2)}</span>
         </div>
         <div className="summary-row total-row">
           <span>Total</span>
-          <span>${(subtotal + tip).toFixed(2)}</span>
+          <span>${finalTotal.toFixed(2)}</span>
         </div>
       </div>
 
@@ -657,6 +780,75 @@ function CheckoutPanel({
         </div>
       </div>
 
+      {/* Points Usage - Only show if customer has points */}
+      {customerId && customerPoints > 0 && (
+        <div className="points-section">
+          <div className="points-header">
+            <h3>💰 Use Loyalty Points</h3>
+            <span className="available-points">Available: {customerPoints}</span>
+          </div>
+          {!showPointsInput ? (
+            <button
+              className="use-points-btn"
+              onClick={() => setShowPointsInput(true)}
+            >
+              Use Points to Discount
+            </button>
+          ) : (
+            <div className="points-input-group">
+              <div className="points-ratio">10 points = $1.00</div>
+              <div className="points-controls">
+                <input
+                  type="number"
+                  placeholder="Enter points to use"
+                  value={pointsInput}
+                  onChange={(e) => setPointsInput(e.target.value)}
+                  min="0"
+                  step="10"
+                  max={customerPoints}
+                />
+                <button
+                  className="points-apply"
+                  onClick={() => {
+                    const val = parseInt(pointsInput, 10);
+                    if (!isNaN(val) && val >= 0 && val <= customerPoints) {
+                      setPointsToUse(val);
+                      setPointsInput('');
+                      setShowPointsInput(false);
+                    } else {
+                      alert('Please enter a valid amount between 0 and ' + customerPoints);
+                    }
+                  }}
+                >
+                  Apply
+                </button>
+                <button
+                  className="points-cancel"
+                  onClick={() => {
+                    setShowPointsInput(false);
+                    setPointsInput('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+              {pointsToUse > 0 && (
+                <button
+                  className="clear-points"
+                  onClick={() => {
+                    setPointsToUse(0);
+                    setPointsInput('');
+                    setShowPointsInput(false);
+                  }}
+                >
+                  Clear Points
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Customer Name */}
       <div className="customer-section">
         <label htmlFor="customer-name">Customer Name (optional)</label>
@@ -671,10 +863,10 @@ function CheckoutPanel({
 
       <button
         className="pay-btn"
-        onClick={() => onPay(customerName)}
+        onClick={() => onPay(customerName, pointsDiscountApplied)}
         disabled={isProcessing}
       >
-        {isProcessing ? 'Processing…' : `Pay $${(subtotal + tip).toFixed(2)}`}
+        {isProcessing ? 'Processing…' : `Pay $${finalTotal.toFixed(2)}`}
       </button>
     </div>
   );
