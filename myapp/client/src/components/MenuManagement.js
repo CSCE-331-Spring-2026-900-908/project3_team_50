@@ -57,6 +57,25 @@ export default function MenuManagement() {
     loadItems();
   }, [loadItems]);
 
+  // Sync form automatically if user clicks a different row while in "edit" mode
+  useEffect(() => {
+    if (modal === 'edit') {
+      if (selectedId === null) {
+        setModal(null);
+      } else {
+        const item = items.find((i) => i.item_id === selectedId);
+        if (item) {
+          setForm({
+            item_name: item.item_name,
+            item_category: item.item_category,
+            price: parseFloat(item.price).toFixed(2),
+            ingredient_ids: item.ingredients || '',
+          });
+        }
+      }
+    }
+  }, [selectedId, items, modal]);
+
   // ── Helpers ────────────────────────────────────────────────────────
   const openAdd = () => {
     setForm({ item_name: '', item_category: '', price: '', ingredient_ids: '' });
@@ -165,8 +184,12 @@ export default function MenuManagement() {
       </div>
 
       {/* ── Boba Icon Test Bench ────────────────────────────────────── */}
-      <div className="glass-card" style={{ padding: '2rem', marginBottom: '2rem', display: 'flex', gap: '3rem', alignItems: 'center' }}>
-        <div style={{ width: '180px', height: '240px', backgroundColor: '#F8F9FA', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <details style={{ marginBottom: '1rem' }}>
+        <summary style={{ padding: '10px', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer', background: 'var(--bg-glass)', borderRadius: '8px', border: '1px solid var(--border-default)' }}>
+          Toggle Component Test Bench (Boba Icons)
+        </summary>
+        <div className="glass-card" style={{ padding: '2rem', marginTop: '1rem', marginBottom: '1rem', display: 'flex', gap: '3rem', alignItems: 'center' }}>
+          <div style={{ width: '180px', height: '240px', backgroundColor: '#F8F9FA', borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
           <BobaIcon
             liquidGradient={[
               { offset: "0%", color: bobaTest.colorBottom },
@@ -275,9 +298,13 @@ export default function MenuManagement() {
             />
           </div>
         </div>
-      </div>
+        </div>
+      </details>
 
-      {/* ── Table ─────────────────────────────────────────────────── */}
+      {/* ── Main Layout ───────────────────────────────────────────── */}
+      <div className="mgmt-main-content">
+        <div className="mgmt-left-panel">
+          {/* ── Table ─────────────────────────────────────────────────── */}
       <div className="table-wrapper glass-card">
         <table className="mgmt-table" id="menu-table">
           <thead>
@@ -337,51 +364,60 @@ export default function MenuManagement() {
         </button>
       </div>
 
-      {/* ── Modal ─────────────────────────────────────────────────── */}
-      {modal && (
-        <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>{modal === 'add' ? 'Add New Menu Item' : 'Update Menu Item'}</h2>
+        </div>
 
-            <label>
-              Item Name
-              <input
-                type="text"
-                value={form.item_name}
-                onChange={(e) => setForm({ ...form, item_name: e.target.value })}
-              />
-            </label>
+        {/* ── Right Panel ─────────────────────────────────────────── */}
+        {modal && (
+          <div className="mgmt-right-panel glass-card">
+            <div className="mgmt-form-header">
+              <h2>{modal === 'add' ? 'Add New Menu Item' : 'Update Menu Item'}</h2>
+              <button className="mgmt-close-btn" onClick={() => setModal(null)}>&times;</button>
+            </div>
 
-            <label>
-              Category
-              <input
-                type="text"
-                value={form.item_category}
-                onChange={(e) => setForm({ ...form, item_category: e.target.value })}
-              />
-            </label>
+            <div className="mgmt-form-body">
+              <label>
+                Item Name
+                <input
+                  type="text"
+                  placeholder="e.g. Classic Milk Tea"
+                  value={form.item_name}
+                  onChange={(e) => setForm({ ...form, item_name: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Price
-              <input
-                type="number"
-                step="0.01"
-                value={form.price}
-                onChange={(e) => setForm({ ...form, price: e.target.value })}
-              />
-            </label>
+              <label>
+                Category
+                <input
+                  type="text"
+                  placeholder="e.g. Milk Tea"
+                  value={form.item_category}
+                  onChange={(e) => setForm({ ...form, item_category: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Ingredient IDs (comma-separated)
-              <input
-                type="text"
-                placeholder="1, 5, 9, 12"
-                value={form.ingredient_ids}
-                onChange={(e) => setForm({ ...form, ingredient_ids: e.target.value })}
-              />
-            </label>
+              <label>
+                Price
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g. 5.99"
+                  value={form.price}
+                  onChange={(e) => setForm({ ...form, price: e.target.value })}
+                />
+              </label>
 
-            <div className="modal-btns">
+              <label>
+                Ingredient IDs (comma-separated)
+                <input
+                  type="text"
+                  placeholder="1, 5, 9, 12"
+                  value={form.ingredient_ids}
+                  onChange={(e) => setForm({ ...form, ingredient_ids: e.target.value })}
+                />
+              </label>
+            </div>
+
+            <div className="mgmt-form-footer">
               <button className="modal-cancel" onClick={() => setModal(null)}>
                 Cancel
               </button>
@@ -393,8 +429,8 @@ export default function MenuManagement() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
