@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import LanguageSwitcher from '../i18n/LanguageSwitcher';
 import './Login.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -8,7 +9,7 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
    Login Screen (PIN Pad)
    Translates App.java's PIN pad to React
    ═══════════════════════════════════════════════════════════════════════ */
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, language, setLanguage, supportedLanguages, isTranslating }) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -47,6 +48,14 @@ export default function Login({ onLogin }) {
 
   return (
     <div className="login-wrapper">
+      <div className="login-language-switcher">
+        <LanguageSwitcher
+          language={language}
+          setLanguage={setLanguage}
+          supportedLanguages={supportedLanguages}
+          isTranslating={isTranslating}
+        />
+      </div>
       <div className="login-card glass-card">
         <div className="login-header">
           <span className="brand-icon">🧋</span>

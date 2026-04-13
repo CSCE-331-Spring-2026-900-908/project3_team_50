@@ -2,9 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const dotenv = require('dotenv');
+const path = require('path');
 
-// Load .env from the server directory
-dotenv.config();
+// Load existing root .env first
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+// Then load server-specific .env for backend-only secrets
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // ── Express setup ──────────────────────────────────────────────────────
 const app = express();
@@ -31,11 +35,13 @@ const authRoutes = require('./routes/auth');
 const menuRoutes = require('./routes/menu');
 const orderRoutes = require('./routes/orders');
 const inventoryRoutes = require('./routes/inventory');
+const weatherRoutes = require('./routes/weather');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/weather', weatherRoutes);
 
 // Health-check endpoint
 app.get('/api/health', async (req, res) => {

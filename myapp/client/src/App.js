@@ -7,6 +7,8 @@ import InventoryManagement from './components/InventoryManagement';
 import ManagerDashboard from './components/ManagerDashboard';
 import Login from './components/Login';
 import Kiosk from './components/Kiosk';
+import LanguageSwitcher from './i18n/LanguageSwitcher';
+import useGoogleTranslate from './i18n/Translate';
 import './App.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -16,6 +18,7 @@ function App() {
   const [showPinBox, setShowPinBox] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
+  const { language, setLanguage, supportedLanguages, isTranslating } = useGoogleTranslate();
 
   
   useEffect(() => {
@@ -67,7 +70,15 @@ function App() {
 
   // If not logged in, show only the Login screen
   if (!user) {
-    return <Login onLogin={setUser} />;
+    return (
+      <Login
+        onLogin={setUser}
+        language={language}
+        setLanguage={setLanguage}
+        supportedLanguages={supportedLanguages}
+        isTranslating={isTranslating}
+      />
+    );
   }
 
   //const isCashier = user.role === 'Cashier'; not needed for now
@@ -91,6 +102,12 @@ function App() {
             </div>
 
             <div className="nav-user">
+              <LanguageSwitcher
+                language={language}
+                setLanguage={setLanguage}
+                supportedLanguages={supportedLanguages}
+                isTranslating={isTranslating}
+              />
               <button className="logout-btn" onClick={handleCustomerLogout}>Logout</button>
             </div>
           </nav>
@@ -195,6 +212,12 @@ function App() {
           </div>
 
           <div className="nav-user">
+            <LanguageSwitcher
+              language={language}
+              setLanguage={setLanguage}
+              supportedLanguages={supportedLanguages}
+              isTranslating={isTranslating}
+            />
             <span className="user-info">Logged in as {user.name}</span>
             <span className="user-badge">{user.role}</span>
             <button className="logout-btn" onClick={handleLogout}>Logout</button>
