@@ -7,6 +7,7 @@
   /*#2D1350;  */
   /* ── The Boba Spot Palette ────────────────────────────────────────── */
   --clr-indigo: #4B248B;
+  --clr-primary-rgb: 75, 36, 139;
   /* Primary - Headers, Sidebars */
   --clr-pink: #FF1E90;
   /* Secondary - Checkout buttons */
@@ -131,4 +132,26 @@ h3 {
 .glass-card:hover {
   background: var(--bg-surface-raised);
   box-shadow: var(--shadow-md);
+}
+
+/* ── Custom Scrollbar (Themed) ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--clr-primary);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--clr-primary-light);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--clr-primary) var(--bg-surface);
 }

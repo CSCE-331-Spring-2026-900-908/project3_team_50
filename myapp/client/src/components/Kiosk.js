@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Kiosk.css';
+import { BobaIcon, BobaTopping, isPopping, TOPPING_STYLES } from './BobaIcon';
+
+const defaultIconConfig = {
+  teaColor: '#E6C9A8', milkColor: '#FFFFFF', waveComplexity: 1, hasBoba: true, iceLevel: 'Regular Ice'
+};
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -8,86 +13,30 @@ const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
    Kiosk — Customer ordering view
    Mirrors CashierDashboard but for customer self-service
    ═══════════════════════════════════════════════════════════════════════ */
-   //for customers with accounts, points displayed in the corner of the screen.
-   //upon checkout, customer earns the rounded down dollar amount of points. $5.60 = 5 points
-   //option to use points at checkout. Can accept or deny. Can pic how many point they want to use. in whole dollar amounts. 
-   //10 points is worth 1 dollar. using 130 points on a $13 dollar order makes it free but also resets points to 0. using 10 points on a $5.60 order makes it $4.60 
-   //Orders where a discount is use is void to earn points.
-   //Customer with account, Past 3 orders are listed in the bottom left corner. Rebuy button. On click and the order is populated. 
-   //Upon purchase, reorder section is updates. 
-
-   
 export default function Kiosk() {
   // ── State ──────────────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(null);
   const [menuItems, setMenuItems] = useState([]);
   const [bobaToppings, setBobaToppings] = useState([]);
 
-  // Order state (mirrors orderItems list in Java)
+  // Order state
   const [orderItems, setOrderItems] = useState([]);
   const [currentItemIndex, setCurrentItemIndex] = useState(null);
 
-  // View state — "CUSTOMER_INFO" | "CATEGORIES" | "ITEMS" | "ADDONS" | "CHECKOUT"
-  const [view, setView] = useState('CUSTOMER_INFO');
+  // View state — "ITEMS" | "ADDONS" | "CHECKOUT"
+  const [view, setView] = useState('ITEMS');
   const [tip, setTip] = useState(0);
   const [customTipInput, setCustomTipInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [customerFirstName, setCustomerFirstName] = useState('');
-  const [customerLastName, setCustomerLastName] = useState('');
-  const [customerEmail, setCustomerEmail] = useState('');
-  const [customerPhone, setCustomerPhone] = useState('');
-  const [customerId, setCustomerId] = useState(null);
-  const [showNameModal, setShowNameModal] = useState(false);
-  const [nameModalTitle, setNameModalTitle] = useState('');
-  const [tempFirstName, setTempFirstName] = useState('');
-  const [tempLastName, setTempLastName] = useState('');
-  const [customerPoints, setCustomerPoints] = useState(0);
-  const [pastOrders, setPastOrders] = useState([]);
-  const [pointsToUse, setPointsToUse] = useState(0);
-  const [reorderedOrderId, setReorderedOrderId] = useState(null);
 
-  
+  // ── Derived values ─────────────────────────────────────────────────
   const subtotal = orderItems.reduce(
     (sum, item) => sum + item.basePrice + item.bobaPrice,
     0
   );
 
-  
-  useEffect(() => {
-    const savedSession = localStorage.getItem('kiosk_customer_session');
-    if (savedSession) {
-      try {
-        const session = JSON.parse(savedSession);
-        setCustomerId(session.customerId);
-        setCustomerFirstName(session.customerFirstName);
-        setCustomerLastName(session.customerLastName);
-        setCustomerEmail(session.customerEmail);
-        setCustomerPhone(session.customerPhone);
-        setView('CATEGORIES');
-      } catch (err) {
-        console.error('Failed to restore session:', err);
-        localStorage.removeItem('kiosk_customer_session');
-      }
-    }
-  }, []);
-
-  // ── Save customer session to localStorage when customer data changes ──
-  useEffect(() => {
-    if (customerId && view !== 'CUSTOMER_INFO') {
-      const session = {
-        customerId,
-        customerFirstName,
-        customerLastName,
-        customerEmail,
-        customerPhone,
-      };
-      localStorage.setItem('kiosk_customer_session', JSON.stringify(session));
-    }
-  }, [customerId, customerFirstName, customerLastName, customerEmail, customerPhone, view]);
-
- 
+  // ── Data fetching ──────────────────────────────────────────────────
   useEffect(() => {
     axios.get(`${API}/menu/categories`).then((r) => {
       setCategories(r.data);
@@ -96,51 +45,16 @@ export default function Kiosk() {
   }, []);
 
   const fetchItems = useCallback(() => {
-    if (!activeCategory) return;
     axios
-      .get(`${API}/menu/items`, { params: { category: activeCategory } })
+      .get(`${API}/menu/items`)
       .then((r) => setMenuItems(r.data));
-  }, [activeCategory]);
+  }, []);
 
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
 
   // ── Handlers ───────────────────────────────────────────────────────
-  const handleCategoryClick = (category) => {
-    setActiveCategory(category);
-    setView('ITEMS');
-  };
-
-  const handleBackToCategories = () => {
-    setView('CATEGORIES');
-    setActiveCategory(null);
-  };
-
-  // ── Logout handler ──────────────────────────────────────────────────
-  const handleLogout = () => {
-    if (window.confirm('Are you sure you want to logout? Your order will be cleared.')) {
-      // Clear all customer data
-      setCustomerId(null);
-      setCustomerFirstName('');
-      setCustomerLastName('');
-      setCustomerEmail('');
-      setCustomerPhone('');
-      setCustomerPoints(0);
-      setPastOrders([]);
-      setPointsToUse(0);
-      setReorderedOrderId(null);
-      setOrderItems([]);
-      setActiveCategory(null);
-      setTip(0);
-      setCustomTipInput('');
-      setSuccessMessage('');
-      setView('CUSTOMER_INFO');
-      
-      // Clear localStorage session
-      localStorage.removeItem('kiosk_customer_session');
-    }
-  };
 
   const addItemToOrder = (item) => {
     const newItem = {
@@ -152,9 +66,10 @@ export default function Kiosk() {
       bobaPrice: 0,
       ice: 'Regular Ice',
       sweetness: 'Regular Sweet',
+      iconConfig: item.icon_config || null,
     };
-    setOrderItems((prev) => [...prev, newItem]);
-    setCurrentItemIndex(orderItems.length);
+    setOrderItems((prev) => [newItem, ...prev]);
+    setCurrentItemIndex(0);
     setView('ADDONS');
   };
 
@@ -193,58 +108,24 @@ export default function Kiosk() {
     }
   };
 
-  const handleCheckout = async (customerName, discountApplied = false) => {
+  const handleCheckout = async (customerName) => {
     if (orderItems.length === 0) return;
     setIsProcessing(true);
     try {
-      // Calculate discount amount (10 points = $1)
-      const discountAmount = pointsToUse * 0.1;
-      const finalTotal = Math.max(0, subtotal - discountAmount + tip);
-
-      const checkoutRes = await axios.post(`${API}/orders`, {
+      await axios.post(`${API}/orders`, {
         cashier_name: 'Walk-in',
         customer_name: customerName || 'Walk-in',
-        customer_id: customerId || null,
-        total: finalTotal,
-        subtotal: subtotal,
+        total: subtotal,
         tip,
-        points_used: pointsToUse,
-        discount_applied: discountApplied,
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,
         })),
       });
-
-      // If customer account used, update points and past orders
-      if (customerId) {
-        const orderId = checkoutRes.data.order_id;
-        const earnedPoints = discountApplied ? 0 : Math.floor(subtotal);
-        const newPoints = Math.max(0, customerPoints - pointsToUse + earnedPoints);
-        
-        // Update customer points and past orders
-        await axios.patch(`${API}/auth/customer/${customerId}`, {
-          points: newPoints,
-          past_order_id: orderId,
-        });
-        
-        setCustomerPoints(newPoints);
-        setPastOrders([orderId, ...pastOrders].slice(0, 3));
-      }
-
       // Reset
       setOrderItems([]);
       setTip(0);
-      setPointsToUse(0);
-      setReorderedOrderId(null);
-      setCustomerPoints(0);
-      setPastOrders([]);
-      setView('CUSTOMER_INFO');
-      setCustomerFirstName('');
-      setCustomerLastName('');
-      setCustomerEmail('');
-      setCustomerPhone('');
-      setCustomerId(null);
+      setView('CATEGORIES');
       setSuccessMessage('Payment Successful!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
@@ -254,267 +135,112 @@ export default function Kiosk() {
     }
   };
 
-  
-  const handleCustomerInfoContinue = async () => {
-    // If neither email nor phone provided, just skip to categories
-    if (!customerEmail.trim() && !customerPhone.trim()) {
-      setView('CATEGORIES');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      
-      const lookupRes = await axios.post(`${API}/auth/customer-lookup`, {
-        email: customerEmail,
-        phone: customerPhone,
-      });
-
-      const { found, customer, missingField } = lookupRes.data;
-
-      if (found) {
-        
-        setCustomerId(customer.cus_id);
-        setCustomerFirstName(customer.first_name || '');
-        setCustomerLastName(customer.last_name || '');
-        setCustomerPoints(customer.points || 0);
-        
-        // Parse past orders
-        if (customer.past_orders) {
-          const orderIds = customer.past_orders.split(',').map(id => id.trim()).filter(id => id !== '');
-          setPastOrders(orderIds);
-        }
-
-        if (missingField && missingField !== 'none') {
-          
-          if (missingField === 'both') {
-            setNameModalTitle('Complete Your Profile');
-            setTempFirstName('');
-            setTempLastName('');
-            setShowNameModal(true);
-          } else if (missingField === 'email' || missingField === 'phone') {
-            // Single field missing - proceed (handle manual entry at checkout if needed)
-            setView('CATEGORIES');
-          }
-        } else {
-          
-          setView('CATEGORIES');
-        }
-      } else {
-        
-        setNameModalTitle('Register New Account');
-        setTempFirstName('');
-        setTempLastName('');
-        setShowNameModal(true);
-      }
-    } catch (err) {
-      alert('Error: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  
-  const handleNameModalSubmit = async () => {
-    if (!tempFirstName.trim() || !tempLastName.trim()) {
-      alert('Please enter both first and last name');
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      const registerRes = await axios.post(`${API}/auth/register-customer`, {
-        first_name: tempFirstName,
-        last_name: tempLastName,
-        email: customerEmail,
-        phone: customerPhone,
-        customer_id: customerId || null,
-      });
-
-      setCustomerId(registerRes.data.customer_id);
-      setCustomerFirstName(tempFirstName);
-      setCustomerLastName(tempLastName);
-      setCustomerPoints(0);
-      setPastOrders([]);
-      setShowNameModal(false);
-      setView('CATEGORIES');
-    } catch (err) {
-      alert('Registration error: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  // ── Reorder handler ────────────────────────────────────────────────
-  const handleReorder = async (orderId) => {
-    // If clicking the same order again, toggle it off
-    if (reorderedOrderId === orderId) {
-      setOrderItems([]);
-      setReorderedOrderId(null);
-      return;
-    }
-
-    setIsProcessing(true);
-    try {
-      // Fetch order details
-      const orderRes = await axios.get(`${API}/orders/${orderId}`);
-      const orderData = orderRes.data;
-      
-      // Populate order items with fetched data
-      const newItems = orderData.items.map((item) => ({
-        baseItemId: item.baseItemId,
-        name: item.name,
-        basePrice: item.basePrice,
-        bobaInventoryId: item.bobaInventoryId || -1,
-        boba: item.boba || 'No Boba',
-        bobaPrice: item.bobaPrice || 0,
-        ice: item.ice || 'Regular Ice',
-        sweetness: item.sweetness || 'Regular Sweet',
-      }));
-
-      setOrderItems(newItems);
-      setReorderedOrderId(orderId);
-    } catch (err) {
-      alert('Failed to load order: ' + (err.response?.data?.error || err.message));
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-  
+  // ── Render ─────────────────────────────────────────────────────────
   return (
     <div className="kiosk-layout">
-      {/* ── HEADER with Logout Button ──────────────────────────────── */}
-      {view !== 'CUSTOMER_INFO' && (
-        <div className="kiosk-header">
-          <div className="header-content">
-            <div className="header-welcome">
-              {customerFirstName && customerLastName && (
-                <span>Welcome, {customerFirstName}!</span>
-              )}
-              {customerPoints > 0 && (
-                <span className="header-points">💰 {customerPoints} points</span>
-              )}
-            </div>
-            <button className="logout-btn-header" onClick={handleLogout}>
-              ← Back / Logout
-            </button>
-          </div>
-        </div>
-      )}
-      
-      {showNameModal && (
-        <NameEntryModal
-          title={nameModalTitle}
-          firstName={tempFirstName}
-          lastName={tempLastName}
-          onFirstNameChange={setTempFirstName}
-          onLastNameChange={setTempLastName}
-          onSubmit={handleNameModalSubmit}
-          isProcessing={isProcessing}
-        />
-      )}
-
       <div className="kiosk-content-wrapper">
-        {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
-        <div className="kiosk-main">
-          {view === 'CUSTOMER_INFO' && (
-            <CustomerInfoPrompt
-              email={customerEmail}
-              phone={customerPhone}
-              onFirstNameChange={setCustomerFirstName}
-              onLastNameChange={setCustomerLastName}
-              onEmailChange={setCustomerEmail}
-              onPhoneChange={setCustomerPhone}
-              onContinue={handleCustomerInfoContinue}
-              isProcessing={isProcessing}
-            />
-          )}
+      {view === 'ADDONS' && currentItemIndex !== null && (
+        <button className="back-arrow" onClick={() => {
+          setCurrentItemIndex(null);
+          setView('ITEMS');
+        }}>
+          ← Back
+        </button>
+      )}
+      {/* ── MAIN CONTENT ──────────────────────────────────────────────── */}
+      <div className="kiosk-main">
+        {view === 'ITEMS' && (
+          <div className="items-view" style={{ display: 'flex', flexDirection: 'row', gap: '16px' }}>
+            {/* Sidebar Anchor Navigation */}
+            <nav className="kiosk-sidebar-nav">
+              <p className="cat-nav-label">Categories</p>
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  className="category-nav-btn"
+                  onClick={() => {
+                    const el = document.getElementById(`category-${category}`);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  {category}
+                </button>
+              ))}
+            </nav>
 
-          {view === 'CATEGORIES' && (
-            <div className="categories-view">
-              <h1 className="kiosk-title">Select a Category</h1>
-              <div className="categories-grid">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    className="category-box"
-                    onClick={() => handleCategoryClick(category)}
-                  >
-                    <div className="category-image">
-                      {getCategoryEmoji(category)}
+            {/* Continuous Scroll Items */}
+            <div className="items-scroll-container">
+              {categories.map((category) => {
+                const itemsInCategory = menuItems.filter(i => i.item_category === category);
+                if (itemsInCategory.length === 0) return null;
+                return (
+                  <div key={category} id={`category-${category}`} className="category-section">
+                    <h2 className="items-title">{category}</h2>
+                    <div className="items-grid">
+                      {itemsInCategory.map((item) => (
+                        <button
+                          key={item.item_id}
+                          className="item-card"
+                          onClick={() => addItemToOrder(item)}
+                        >
+                          <div className="item-icon-wrap">
+                            <BobaIcon
+                              teaColor={item.icon_config?.teaColor || defaultIconConfig.teaColor}
+                              milkColor={item.icon_config?.milkColor || defaultIconConfig.milkColor}
+                              waveComplexity={item.icon_config?.waveComplexity ?? defaultIconConfig.waveComplexity}
+                              iceLevel={'Regular Ice'}
+                              hasBoba={item.icon_config?.hasBoba ?? defaultIconConfig.hasBoba}
+                            />
+                          </div>
+                          <span className="item-name">{item.item_name}</span>
+                          <span className="item-price">${parseFloat(item.price).toFixed(2)}</span>
+                        </button>
+                      ))}
                     </div>
-                    <span className="category-name">{category}</span>
-                  </button>
-                ))}
-              </div>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </div>
+        )}
 
-          {view === 'ITEMS' && activeCategory && (
-            <div className="items-view">
-              <button className="back-arrow" onClick={handleBackToCategories}>
-                ← Back
-              </button>
-              <h2 className="items-title">{activeCategory}</h2>
-              <div className="items-grid">
-                {menuItems.map((item) => (
-                  <button
-                    key={item.item_id}
-                    className="item-card glass-card"
-                    onClick={() => addItemToOrder(item)}
-                  >
-                    <span className="item-name">{item.item_name}</span>
-                    <span className="item-price">${parseFloat(item.price).toFixed(2)}</span>
-                  </button>
-                ))}
-                {menuItems.length === 0 && (
-                  <p className="empty-hint">No items in this category</p>
-                )}
-              </div>
+        {view === 'ADDONS' && currentItemIndex !== null && (
+          <div className="addons-view">
+            <div className="addons-header-row">
+              <h2 className="addons-heading">
+                Customize: <span className="highlight">{orderItems[currentItemIndex].name}</span>
+              </h2>
             </div>
-          )}
 
-          {view === 'ADDONS' && currentItemIndex !== null && (
-            <div className="addons-view">
-              <button className="back-arrow" onClick={() => {
+            <AddonsPanel
+              item={orderItems[currentItemIndex]}
+              bobaToppings={bobaToppings}
+              onSelectBoba={selectBoba}
+              onUpdateItem={updateCurrentItem}
+              onDone={() => {
                 setCurrentItemIndex(null);
                 setView('ITEMS');
-              }}>
-                ← Back
-              </button>
-              <AddonsPanel
-                item={orderItems[currentItemIndex]}
-                bobaToppings={bobaToppings}
-                onSelectBoba={selectBoba}
-                onUpdateItem={updateCurrentItem}
-                onDone={() => {
-                  setCurrentItemIndex(null);
-                  setView('ITEMS');
-                }}
-              />
-            </div>
-          )}
-
-          {view === 'CHECKOUT' && (
-            <CheckoutPanel
-              subtotal={subtotal}
-              tip={tip}
-              setTip={setTip}
-              customTipInput={customTipInput}
-              setCustomTipInput={setCustomTipInput}
-              onPay={handleCheckout}
-              onBack={() => setView('ITEMS')}
-              isProcessing={isProcessing}
-              customerPoints={customerPoints}
-              pointsToUse={pointsToUse}
-              setPointsToUse={setPointsToUse}
-              customerId={customerId}
+              }}
             />
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* ── RIGHT: Order summary ──────────────────────────────────── */}
-        <aside className="order-sidebar glass-card">
+        {view === 'CHECKOUT' && (
+          <CheckoutPanel
+            subtotal={subtotal}
+            tip={tip}
+            setTip={setTip}
+            customTipInput={customTipInput}
+            setCustomTipInput={setCustomTipInput}
+            onPay={handleCheckout}
+            onBack={() => setView('ITEMS')}
+            isProcessing={isProcessing}
+          />
+        )}
+      </div>
+
+      {/* ── RIGHT: Order summary ──────────────────────────────────── */}
+      <aside className="order-sidebar glass-card">
         <h3 className="sidebar-title">Current Order</h3>
 
         {successMessage && (
@@ -527,35 +253,117 @@ export default function Kiosk() {
           {orderItems.length === 0 && (
             <p className="empty-order">No items yet</p>
           )}
-          {orderItems.map((item, i) => (
+          {orderItems.map((item, i) => {
+            const bobaStyle = TOPPING_STYLES[item.boba];
+            const pearlColor = bobaStyle ? bobaStyle.fill : '#1A0A02';
+            const isEditing = view === 'ADDONS' && i === currentItemIndex;
+            return (
             <div key={i} className="order-row">
-              <div className="order-row-top">
-                <span className="order-item-name">{item.name}</span>
-                <span className="order-item-price">
-                  ${(item.basePrice + item.bobaPrice).toFixed(2)}
-                </span>
-                <button
-                  className="remove-btn"
-                  title="Remove"
-                  onClick={() => removeItem(i)}
-                >
-                  ✕
-                </button>
-              </div>
-              {/* Addon tags */}
-              <div className="addon-tags">
+              {isEditing ? (
+                /* Large preview when actively editing this drink */
+                <>
+                  <div className="order-row-top">
+                    <div className="order-item-info">
+                      <span className="order-item-name">{item.name}</span>
+                      <span className="order-item-price">
+                        ${(item.basePrice + item.bobaPrice).toFixed(2)}
+                      </span>
+                    </div>
+                    <button
+                      className="remove-btn"
+                      title="Remove item"
+                      onClick={() => removeItem(i)}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div className="order-icon-large">
+                    <BobaIcon
+                      teaColor={item.iconConfig?.teaColor || defaultIconConfig.teaColor}
+                      milkColor={item.iconConfig?.milkColor || defaultIconConfig.milkColor}
+                      waveComplexity={item.iconConfig?.waveComplexity ?? defaultIconConfig.waveComplexity}
+                      iceLevel={item.ice}
+                      hasBoba={item.boba !== 'No Boba'}
+                      bobaColor={pearlColor}
+                      logoText="TEAM 50"
+                    />
+                  </div>
+                </>
+              ) : (
+                /* Normal compact row */
+                <div className="order-row-top">
+                  <div className="order-icon-mini">
+                    <BobaIcon
+                      teaColor={item.iconConfig?.teaColor || defaultIconConfig.teaColor}
+                      milkColor={item.iconConfig?.milkColor || defaultIconConfig.milkColor}
+                      waveComplexity={item.iconConfig?.waveComplexity ?? defaultIconConfig.waveComplexity}
+                      iceLevel={item.ice}
+                      hasBoba={item.boba !== 'No Boba'}
+                      bobaColor={pearlColor}
+                      logoText=""
+                    />
+                  </div>
+                  <div className="order-item-info">
+                    <span className="order-item-name">{item.name}</span>
+                    <span className="order-item-price">
+                      ${(item.basePrice + item.bobaPrice).toFixed(2)}
+                    </span>
+                  </div>
+                  <button
+                    className="remove-btn"
+                    title="Remove item"
+                    onClick={() => removeItem(i)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+              {/* Per-addon rows, each removable */}
+              <div className="order-addons">
                 {item.boba !== 'No Boba' && (
-                  <span className="addon-tag">+ {item.boba}</span>
+                  <div className="order-addon-row">
+                    <span className="addon-row-icon-wrap">
+                      <svg viewBox="0 0 20 20" aria-hidden="true" className="addon-row-pearl-svg">
+                        {(() => {
+                          const s = TOPPING_STYLES[item.boba];
+                          const c = s ? s.fill : '#1A0A02';
+                          const r = s ? s.rim : '#3D1A04';
+                          return [<circle key={0} cx={7} cy={10} r={5} fill={c} stroke={r} strokeWidth={1} />, <circle key={1} cx={14} cy={10} r={5} fill={c} stroke={r} strokeWidth={1} />];
+                        })()}
+                      </svg>
+                      {item.boba}
+                    </span>
+                    <button className="addon-remove-btn" onClick={() => {
+                      const copy = [...orderItems];
+                      copy[i] = { ...copy[i], bobaInventoryId: -1, boba: 'No Boba', bobaPrice: 0 };
+                      setOrderItems(copy);
+                    }}>✕</button>
+                  </div>
                 )}
                 {item.ice !== 'Regular Ice' && (
-                  <span className="addon-tag">+ {item.ice}</span>
+                  <div className="order-addon-row">
+                    <span>🧊 {item.ice}</span>
+                    <button className="addon-remove-btn" onClick={() => {
+                      const copy = [...orderItems];
+                      copy[i] = { ...copy[i], ice: 'Regular Ice' };
+                      setOrderItems(copy);
+                    }}>✕</button>
+                  </div>
                 )}
                 {item.sweetness !== 'Regular Sweet' && (
-                  <span className="addon-tag">+ {item.sweetness}</span>
+                  <div className="order-addon-row">
+                    <span>🍯 {item.sweetness}</span>
+                    <button className="addon-remove-btn" onClick={() => {
+                      const copy = [...orderItems];
+                      copy[i] = { ...copy[i], sweetness: 'Regular Sweet' };
+                      setOrderItems(copy);
+                    }}>✕</button>
+                  </div>
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="order-total-bar">
@@ -567,32 +375,13 @@ export default function Kiosk() {
           className="checkout-btn"
           disabled={orderItems.length === 0}
           onClick={() => {
-            setTip(subtotal * 0.2);
+            setTip(0);
             setView('CHECKOUT');
           }}
         >
           Checkout
         </button>
-        </aside>
-
-        {/* ── BOTTOM LEFT: Past orders (for logged-in customers) ──────── */}
-        {customerId && pastOrders.length > 0 && (
-          <aside className="past-orders-panel glass-card">
-            <h3 className="sidebar-title">Past Orders</h3>
-            <div className="past-orders-list">
-              {pastOrders.map((orderId) => (
-                <button
-                  key={orderId}
-                  className={`past-order-btn ${reorderedOrderId === orderId ? 'active' : ''}`}
-                  onClick={() => handleReorder(orderId)}
-                >
-                  Order #{orderId}
-                  {reorderedOrderId === orderId && <span className="check-mark">✓</span>}
-                </button>
-              ))}
-            </div>
-          </aside>
-        )}
+      </aside>
       </div>
     </div>
   );
@@ -605,108 +394,103 @@ function getCategoryEmoji(category) {
     'Milk Tea': '🥛🧋',
     'Fruit Tea': '🧃🧋',
     'Boba': '🧋',
-    
+
   };
   return emojiMap[category] || '🧋';
 }
 
 /* ─── Addons Sub-Component ─────────────────────────────────────────── */
 function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone }) {
-  const iceOptions = ['Regular Ice', 'Less Ice', 'No Ice'];
-  const sweetnessOptions = ['More Sweet', 'Regular Sweet', 'Less Sweet'];
+  const iceOptions     = ['More Ice', 'Regular Ice', 'Less Ice', 'No Ice'];
+  const sweetnessOpts  = ['More Sweet', 'Regular Sweet', 'Less Sweet'];
 
-  const poppingBoba = bobaToppings.filter(t => t.name.toLowerCase().includes('popping')).sort((a,b) => a.name.localeCompare(b.name));
-  const otherBoba = bobaToppings.filter(t => !t.name.toLowerCase().includes('popping')).sort((a,b) => a.name.localeCompare(b.name));
+  const clearBoba = () => {
+    onUpdateItem('bobaInventoryId', -1);
+    onUpdateItem('boba', 'No Boba');
+    onUpdateItem('bobaPrice', 0);
+  };
 
   return (
     <div className="addons-panel">
-      <h2 className="addons-heading">
-        Customize: <span className="highlight">{item.name}</span>
-      </h2>
+      {/* Toppings and sections follow */}
+      {/* ── Boba Toppings ─────────────────────────────────────────── */}
+      <section className="addon-section" aria-label="Boba toppings">
+        <h3 className="addon-section-title">🧋 Boba Toppings</h3>
 
-      {/* Boba */}
-      <div className="addon-section">
-        <h3 className="addon-section-title">🧋 Boba Toppings — $0.50 each</h3>
-        
-        {otherBoba.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Classic & Jelly</h4>
-            <div className="addon-options">
-              {otherBoba.map((t) => (
-                <button
-                  key={t.id}
-                  className={`addon-btn ${item.bobaInventoryId === t.id ? 'selected' : ''}`}
-                  onClick={() => onSelectBoba(t)}
-                >
-                  {t.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Regular Boba subsection */}
+        <p className="addon-sub-label">Classic Boba — <strong>+$0.50</strong></p>
+        <div className="boba-topping-grid">
+          {bobaToppings.filter((t) => !isPopping(t.name)).map((t) => (
+            <BobaTopping
+              key={t.id}
+              topping={t}
+              selected={item.bobaInventoryId === t.id}
+              onClick={() => onSelectBoba(t)}
+            />
+          ))}
+        </div>
 
-        {poppingBoba.length > 0 && (
-          <div style={{ marginBottom: '16px' }}>
-            <h4 style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '8px' }}>Popping Boba</h4>
-            <div className="addon-options">
-              {poppingBoba.map((t) => (
-                <button
-                  key={t.id}
-                  className={`addon-btn ${item.bobaInventoryId === t.id ? 'selected' : ''}`}
-                  onClick={() => onSelectBoba(t)}
-                >
-                  {t.name}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Popping Boba subsection */}
+        <p className="addon-sub-label" style={{ marginTop: '16px' }}>Popping Boba — <strong>+$0.50</strong></p>
+        <div className="boba-topping-grid">
+          {bobaToppings.filter((t) => isPopping(t.name)).map((t) => (
+            <BobaTopping
+              key={t.id}
+              topping={t}
+              selected={item.bobaInventoryId === t.id}
+              onClick={() => onSelectBoba(t)}
+            />
+          ))}
+        </div>
 
-        <div className="addon-options">
+        {/* No-Boba option */}
+        <div className="boba-topping-grid" style={{ marginTop: '12px' }}>
           <button
-            className={`addon-btn ${item.bobaInventoryId === -1 ? 'selected' : ''}`}
-            onClick={() =>
-              onUpdateItem('bobaInventoryId', -1) ||
-              onUpdateItem('boba', 'No Boba') ||
-              onUpdateItem('bobaPrice', 0)
-            }
+            className={`boba-topping-card no-boba-card${item.bobaInventoryId === -1 ? ' selected' : ''}`}
+            onClick={clearBoba}
+            aria-pressed={item.bobaInventoryId === -1}
           >
-            No Boba
+            <svg viewBox="0 0 34 34" aria-hidden="true" className="boba-topping-svg">
+              <line x1="8" y1="8" x2="26" y2="26" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              <line x1="26" y1="8" x2="8" y2="26" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <span className="boba-topping-name">No Boba</span>
+            <span className="boba-topping-price">Free</span>
           </button>
         </div>
-      </div>
+      </section>
 
-      {/* Ice */}
-      <div className="addon-section">
+      {/* ── Ice Level ─────────────────────────────────────────────── */}
+      <section className="addon-section" aria-label="Ice level">
         <h3 className="addon-section-title">🧊 Ice Level</h3>
         <div className="addon-options">
           {iceOptions.map((opt) => (
             <button
               key={opt}
-              className={`addon-btn ${item.ice === opt ? 'selected' : ''}`}
+              className={`addon-btn${item.ice === opt ? ' selected' : ''}`}
               onClick={() => onUpdateItem('ice', opt)}
             >
               {opt}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Sweetness */}
-      <div className="addon-section">
+      {/* ── Sweetness ─────────────────────────────────────────────── */}
+      <section className="addon-section" aria-label="Sweetness level">
         <h3 className="addon-section-title">🍯 Sweetness</h3>
         <div className="addon-options">
-          {sweetnessOptions.map((opt) => (
+          {sweetnessOpts.map((opt) => (
             <button
               key={opt}
-              className={`addon-btn ${item.sweetness === opt ? 'selected' : ''}`}
+              className={`addon-btn${item.sweetness === opt ? ' selected' : ''}`}
               onClick={() => onUpdateItem('sweetness', opt)}
             >
               {opt}
             </button>
           ))}
         </div>
-      </div>
+      </section>
 
       <button className="done-btn" onClick={onDone}>
         ✓ Done — Back to Menu
@@ -725,24 +509,14 @@ function CheckoutPanel({
   onPay,
   onBack,
   isProcessing,
-  customerPoints = 0,
-  pointsToUse = 0,
-  setPointsToUse,
-  customerId,
 }) {
   const [customerName, setCustomerName] = useState('');
-  const [showPointsInput, setShowPointsInput] = useState(false);
-  const [pointsInput, setPointsInput] = useState('');
 
   const tipPresets = [
     { label: '10%', calc: subtotal * 0.1 },
     { label: '15%', calc: subtotal * 0.15 },
     { label: '20%', calc: subtotal * 0.2 },
   ];
-
-  const discountAmount = pointsToUse * 0.1;
-  const finalTotal = Math.max(0, subtotal - discountAmount + tip);
-  const pointsDiscountApplied = pointsToUse > 0;
 
   return (
     <div className="checkout-panel">
@@ -757,19 +531,13 @@ function CheckoutPanel({
           <span>Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
-        {pointsToUse > 0 && (
-          <div className="summary-row discount-row">
-            <span>Points Discount ({pointsToUse} pts)</span>
-            <span>-${discountAmount.toFixed(2)}</span>
-          </div>
-        )}
         <div className="summary-row">
           <span>Tip</span>
           <span>${tip.toFixed(2)}</span>
         </div>
         <div className="summary-row total-row">
           <span>Total</span>
-          <span>${finalTotal.toFixed(2)}</span>
+          <span>${(subtotal + tip).toFixed(2)}</span>
         </div>
       </div>
 
@@ -787,96 +555,27 @@ function CheckoutPanel({
               <span className="tip-amt">${p.calc.toFixed(2)}</span>
             </button>
           ))}
-          <div className="tip-custom" style={{ display: 'flex', width: '100%' }}>
+          <div className="tip-custom">
             <input
               type="number"
               placeholder="Custom $"
               value={customTipInput}
-              onChange={(e) => {
-                setCustomTipInput(e.target.value);
-                const val = parseFloat(e.target.value);
-                if (!isNaN(val) && val >= 0) {
-                  setTip(val);
-                } else if (e.target.value === '') {
-                  setTip(0);
-                }
-              }}
+              onChange={(e) => setCustomTipInput(e.target.value)}
               min="0"
               step="0.01"
-              style={{ flex: 1 }}
             />
+            <button
+              className="tip-apply"
+              onClick={() => {
+                const val = parseFloat(customTipInput);
+                if (!isNaN(val) && val >= 0) setTip(val);
+              }}
+            >
+              Apply
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Points Usage - Only show if customer has points */}
-      {customerId && customerPoints > 0 && (
-        <div className="points-section">
-          <div className="points-header">
-            <h3>💰 Use Loyalty Points</h3>
-            <span className="available-points">Available: {customerPoints}</span>
-          </div>
-          {!showPointsInput ? (
-            <button
-              className="use-points-btn"
-              onClick={() => setShowPointsInput(true)}
-            >
-              Use Points to Discount
-            </button>
-          ) : (
-            <div className="points-input-group">
-              <div className="points-ratio">10 points = $1.00</div>
-              <div className="points-controls">
-                <input
-                  type="number"
-                  placeholder="Enter points to use"
-                  value={pointsInput}
-                  onChange={(e) => setPointsInput(e.target.value)}
-                  min="0"
-                  step="10"
-                  max={customerPoints}
-                />
-                <button
-                  className="points-apply"
-                  onClick={() => {
-                    const val = parseInt(pointsInput, 10);
-                    if (!isNaN(val) && val >= 0 && val <= customerPoints) {
-                      setPointsToUse(val);
-                      setPointsInput('');
-                      setShowPointsInput(false);
-                    } else {
-                      alert('Please enter a valid amount between 0 and ' + customerPoints);
-                    }
-                  }}
-                >
-                  Apply
-                </button>
-                <button
-                  className="points-cancel"
-                  onClick={() => {
-                    setShowPointsInput(false);
-                    setPointsInput('');
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-              {pointsToUse > 0 && (
-                <button
-                  className="clear-points"
-                  onClick={() => {
-                    setPointsToUse(0);
-                    setPointsInput('');
-                    setShowPointsInput(false);
-                  }}
-                >
-                  Clear Points
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Customer Name */}
       <div className="customer-section">
@@ -892,109 +591,11 @@ function CheckoutPanel({
 
       <button
         className="pay-btn"
-        onClick={() => onPay(customerName, pointsDiscountApplied)}
+        onClick={() => onPay(customerName)}
         disabled={isProcessing}
       >
-        {isProcessing ? 'Processing…' : `Pay $${finalTotal.toFixed(2)}`}
+        {isProcessing ? 'Processing…' : `Pay $${(subtotal + tip).toFixed(2)}`}
       </button>
-    </div>
-  );
-}
-
-
-function CustomerInfoPrompt({ email, phone, onEmailChange, onPhoneChange, onContinue, isProcessing }) {
-  return (
-    <div className="customer-info-modal">
-      <div className="customer-info-box">
-        <h1 className="customer-info-title">Welcome!</h1>
-        <p className="customer-info-subtitle">
-          Do you have an account with us?
-        </p>
-        <p className="customer-info-text">
-          Share your email or phone number so we can save your preferences and order history.
-        </p>
-        <div className = "customer-info-inputs">
-
-        </div>
-        <div className="customer-info-inputs">
-          <div className="input-group">
-            <label htmlFor="customer-email">Email (optional)</label>
-            <input
-              id="customer-email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => onEmailChange(e.target.value)}
-            />
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="customer-phone">Phone (optional)</label>
-            <input
-              id="customer-phone"
-              type="tel"
-              placeholder="(123) 456-7890"
-              value={phone}
-              onChange={(e) => onPhoneChange(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="customer-info-actions">
-          <button className="continue-btn" onClick={onContinue} disabled={isProcessing}>
-            {isProcessing ? 'Processing…' : 'Continue'}
-          </button>
-          <button className="skip-link" onClick={onContinue} disabled={isProcessing}>
-            Skip
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-function NameEntryModal({ title, firstName, lastName, onFirstNameChange, onLastNameChange, onSubmit, isProcessing }) {
-  return (
-    <div className="customer-info-modal">
-      <div className="customer-info-box">
-        <h1 className="customer-info-title">{title}</h1>
-        <p className="customer-info-text">
-          Please enter your name to continue.
-        </p>
-
-        <div className="customer-info-inputs">
-          <div className="input-group">
-            <label htmlFor="first-name">First Name</label>
-            <input
-              id="first-name"
-              type="text"
-              placeholder="John"
-              value={firstName}
-              onChange={(e) => onFirstNameChange(e.target.value)}
-              disabled={isProcessing}
-            />
-          </div>
-
-          <div className="input-group">
-            <label htmlFor="last-name">Last Name</label>
-            <input
-              id="last-name"
-              type="text"
-              placeholder="Doe"
-              value={lastName}
-              onChange={(e) => onLastNameChange(e.target.value)}
-              disabled={isProcessing}
-            />
-          </div>
-        </div>
-
-        <div className="customer-info-actions">
-          <button className="continue-btn" onClick={onSubmit} disabled={isProcessing}>
-            {isProcessing ? 'Processing…' : 'Submit'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
