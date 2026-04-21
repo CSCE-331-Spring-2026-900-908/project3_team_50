@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getLanguageDisplayLabel } from './languageDisplayLabels';
 
 const TRANSLATE_SCRIPT_ID = 'google-translate-script';
 
@@ -68,7 +69,8 @@ export default function useGoogleTranslate() {
         .filter((option) => option.value)
         .map((option) => ({
           code: option.value,
-          label: option.textContent || option.value,
+          // Never use option.textContent — Google rewrites it to the active UI language.
+          label: getLanguageDisplayLabel(option.value, option.value),
         }));
 
       if (options.length > 0) {
