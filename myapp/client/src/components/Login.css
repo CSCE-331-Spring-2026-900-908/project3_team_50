@@ -15,23 +15,29 @@
   z-index: 1000;
 }
 
-.login-language-switcher {
+.login-top-controls {
   position: absolute;
   top: 20px;
   right: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  max-width: min(92vw, 520px);
 }
 
-.login-language-switcher .language-select-wrap label {
+.login-top-controls .language-select-label {
   color: var(--text-secondary);
 }
 
-.login-language-switcher .language-select {
+.login-top-controls .language-select {
   color: var(--text-primary);
   border-color: var(--border-default);
   background: var(--bg-glass);
 }
 
-.login-language-switcher .language-loading {
+.login-top-controls .language-loading {
   color: var(--text-secondary);
 }
 

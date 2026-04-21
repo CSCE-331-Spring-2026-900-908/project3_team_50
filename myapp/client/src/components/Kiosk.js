@@ -387,18 +387,6 @@ export default function Kiosk() {
   );
 }
 
-/* ─── Helper: Get emoji for category ───────────────────────────────── */
-function getCategoryEmoji(category) {
-  const emojiMap = {
-    'Slush': '🥤',
-    'Milk Tea': '🥛🧋',
-    'Fruit Tea': '🧃🧋',
-    'Boba': '🧋',
-
-  };
-  return emojiMap[category] || '🧋';
-}
-
 /* ─── Addons Sub-Component ─────────────────────────────────────────── */
 function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone }) {
   const iceOptions     = ['More Ice', 'Regular Ice', 'Less Ice', 'No Ice'];

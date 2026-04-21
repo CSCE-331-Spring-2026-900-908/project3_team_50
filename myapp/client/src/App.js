@@ -11,6 +11,7 @@ import Login from './components/Login';
 import Kiosk from './components/Kiosk';
 import LanguageSwitcher from './i18n/LanguageSwitcher';
 import useGoogleTranslate from './i18n/Translate';
+import FontSizePicker from './components/FontSizePicker';
 import './App.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
@@ -104,6 +105,7 @@ function App() {
             </div>
 
             <div className="nav-user">
+              <FontSizePicker variant="nav" />
               <LanguageSwitcher
                 language={language}
                 setLanguage={setLanguage}
@@ -214,6 +216,7 @@ function App() {
           </div>
 
           <div className="nav-user">
+            <FontSizePicker variant="nav" />
             <LanguageSwitcher
               language={language}
               setLanguage={setLanguage}

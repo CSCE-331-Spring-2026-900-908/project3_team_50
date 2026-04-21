@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import LanguageSwitcher from '../i18n/LanguageSwitcher';
+import FontSizePicker from './FontSizePicker';
 import './Login.css';
 import { GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
@@ -124,7 +125,8 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
 
   return (
     <div className="login-wrapper">
-      <div className="login-language-switcher">
+      <div className="login-top-controls">
+        <FontSizePicker variant="light" />
         <LanguageSwitcher
           language={language}
           setLanguage={setLanguage}

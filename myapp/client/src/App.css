@@ -11,9 +11,11 @@
 .top-nav {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   justify-content: space-between;
-  padding: 0 24px;
-  height: 64px;
+  gap: 10px 16px;
+  padding: 10px 24px;
+  min-height: 64px;
   background: var(--clr-indigo);
   /* Deep Indigo per request */
   box-shadow: 0 4px 12px rgba(45, 19, 80, 0.2);
@@ -28,6 +30,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .brand-icon {
@@ -45,6 +48,7 @@
 .nav-links {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .nav-pill {
@@ -81,22 +85,34 @@
 .nav-user {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 12px;
+  justify-content: flex-end;
+  margin-left: auto;
+  max-width: 100%;
 }
 
 .language-select-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
+  position: relative;
 }
 
-.language-select-wrap label {
+.language-select-label {
   font-size: .75rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
 }
 
-.language-select {
+.language-dropdown {
+  position: relative;
+}
+
+.language-select,
+.language-select-button {
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
@@ -106,14 +122,122 @@
   padding: 6px 10px;
 }
 
-.language-select option {
-  color: #111111;
+.language-select-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 7.5rem;
+  max-width: min(42vw, 220px);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+}
+
+.language-select-current {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.language-select-chevron {
+  flex-shrink: 0;
+  opacity: 0.85;
+  font-size: 0.7rem;
+}
+
+.language-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 300;
+  margin: 0;
+  padding: 6px 0;
+  list-style: none;
+  min-width: 11rem;
+  max-width: min(90vw, 280px);
+  max-height: min(50vh, 320px);
+  overflow-y: auto;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid rgba(75, 36, 139, 0.15);
+}
+
+.language-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clr-plum);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.language-menu-item:hover {
+  background: var(--clr-lavender);
+}
+
+.language-menu-item.is-active {
+  background: rgba(75, 36, 139, 0.12);
 }
 
 .language-loading {
   font-size: .72rem;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.9);
+}
+
+.font-size-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.font-size-wrap--nav label {
+  font-size: .75rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.font-size-wrap--nav .font-size-select {
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-radius: 999px;
+  font-size: .75rem;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+.font-size-wrap--nav .font-size-select option {
+  color: #111111;
+}
+
+.font-size-wrap--light label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.font-size-wrap--light .font-size-select {
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: 6px 10px;
+}
+
+.font-size-wrap--light .font-size-select option {
+  color: #111111;
 }
 
 .google-translate-hidden {
@@ -172,12 +296,32 @@ body {
 
 /* Nav Welcome (Customer Kiosk)*/
 .nav-welcome {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  flex: 1 1 240px;
+  min-width: 180px;
   font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
+  text-align: center;
+  padding: 0 8px;
+}
+
+@media (max-width: 1000px) {
+  .top-nav {
+    align-items: flex-start;
+  }
+
+  .nav-welcome {
+    order: 3;
+    flex-basis: 100%;
+    text-align: left;
+    padding: 0;
+  }
+
+  .nav-user {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
 }
 
 /* PIN box*/

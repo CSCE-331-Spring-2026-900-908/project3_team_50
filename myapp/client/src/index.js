@@ -4,6 +4,9 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { readFontSize, applyFontSizeToDocument } from './fontSize';
+
+applyFontSizeToDocument(readFontSize());
 
 const clientID = (process.env.REACT_APP_GOOGLE_CLIENT_ID || '').trim();
 
