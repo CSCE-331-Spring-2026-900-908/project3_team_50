@@ -27,7 +27,7 @@ const router = express.Router();
 // ═══════════════════════════════════════════════════════════════════════
 router.post('/', async (req, res) => {
   const pool = req.app.locals.pool;
-  const { cashier_name, customer_name, customer_id, total, subtotal, tip, points_used, discount_applied, items } = req.body;
+  const { cashier_name, customer_name, customer_id, total, subtotal, tip, points_used, points_redeemed, discount_applied, items } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ error: 'No items in order' });
@@ -58,10 +58,18 @@ router.post('/', async (req, res) => {
 
     // 3. Process each item — insert order details & deduct inventory
     for (const item of items) {
-      // Insert Order Detail
+      // Insert Order Detail with customizations stored as JSON
+      const customizations = {
+        boba: item.boba,
+        bobaInventoryId: item.bobaInventoryId,
+        ice: item.ice,
+        sweetness: item.sweetness,
+        iconConfig: item.iconConfig,
+      };
+      
       await client.query(
-        'INSERT INTO Order_Details (Order_ID, Item_ID, Quantity) VALUES ($1, $2, 1)',
-        [newOrderId, item.baseItemId]
+        'INSERT INTO Order_Details (Order_ID, Item_ID, Quantity, customizations) VALUES ($1, $2, 1, $3)',
+        [newOrderId, item.baseItemId, JSON.stringify(customizations)]
       );
 
       // Fetch base recipe ingredients from junction table & deduct
@@ -88,9 +96,10 @@ router.post('/', async (req, res) => {
     // 4. Handle customer loyalty points (if customer_id provided)
     if (customer_id) {
       const baseSubtotal = subtotal || total;
+      const ptsRedeemed = points_redeemed || points_used || 0;
+      // Earn 1 point per dollar of subtotal (after applying any discounts from redemption)
       const earnedPoints = discount_applied ? 0 : Math.floor(baseSubtotal);
-      const pointsUsed = points_used || 0;
-      const newPoints = Math.max(0, earnedPoints - pointsUsed);
+      const newPoints = Math.max(0, earnedPoints - ptsRedeemed);
 
       // Get current customer info
       const customerRes = await client.query(
@@ -129,7 +138,7 @@ router.post('/', async (req, res) => {
 
 // ═══════════════════════════════════════════════════════════════════════
 //  GET /api/orders/:orderId
-//  → Retrieve order details for reorder functionality
+//  → Retrieve order details for reorder functionality with all customizations
 // ═══════════════════════════════════════════════════════════════════════
 router.get('/:orderId', async (req, res) => {
   const pool = req.app.locals.pool;
@@ -146,25 +155,35 @@ router.get('/:orderId', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Get order items with details
+    // Get order items with details and customizations
     const itemsRes = await pool.query(
-      `SELECT od.Item_ID, mi.item_name, mi.price
+      `SELECT od.Item_ID, od.customizations, mi.item_name, mi.price, mi.icon_config
        FROM Order_Details od
        JOIN menu_items mi ON od.Item_ID = mi.item_id
        WHERE od.Order_ID = $1`,
       [orderId]
     );
 
-    const items = itemsRes.rows.map((row) => ({
-      baseItemId: row.item_id,
-      name: row.item_name,
-      basePrice: parseFloat(row.price),
-      bobaInventoryId: -1,
-      boba: 'No Boba',
-      bobaPrice: 0,
-      ice: 'Regular Ice',
-      sweetness: 'Regular Sweet',
-    }));
+    const items = itemsRes.rows.map((row) => {
+      let customizations = {};
+      try {
+        customizations = row.customizations ? JSON.parse(row.customizations) : {};
+      } catch (e) {
+        console.error('Failed to parse customizations:', e);
+      }
+
+      return {
+        baseItemId: row.item_id,
+        name: row.item_name,
+        basePrice: parseFloat(row.price),
+        iconConfig: row.icon_config,
+        bobaInventoryId: customizations.bobaInventoryId || -1,
+        boba: customizations.boba || 'No Boba',
+        bobaPrice: customizations.bobaInventoryId && customizations.bobaInventoryId !== -1 ? 0.5 : 0,
+        ice: customizations.ice || 'Regular Ice',
+        sweetness: customizations.sweetness || 'Regular Sweet',
+      };
+    });
 
     res.json({
       order_id: orderRes.rows[0].order_id,
