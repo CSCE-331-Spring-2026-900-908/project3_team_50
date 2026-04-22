@@ -5,7 +5,7 @@ function FontSizePicker({ variant = 'nav' }) {
   const { fontSize, setFontSize } = useFontSize();
 
   return (
-    <div className={`font-size-wrap font-size-wrap--${variant} notranslate`} translate="no">
+    <div className={`font-size-wrap font-size-wrap--${variant}`}>
       <label htmlFor="font-size-select">Text size</label>
       <select
         id="font-size-select"
