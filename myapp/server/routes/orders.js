@@ -158,7 +158,7 @@ router.get('/:orderId', async (req, res) => {
     // Get order items with details and customizations
     const itemsRes = await pool.query(
       `SELECT od.Item_ID, od.customizations, mi.item_name, mi.price, mi.icon_config
-       FROM Order_Details od
+       FROM order_details od
        JOIN menu_items mi ON od.Item_ID = mi.item_id
        WHERE od.Order_ID = $1`,
       [orderId]
