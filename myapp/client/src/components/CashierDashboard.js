@@ -126,6 +126,8 @@ export default function CashierDashboard() {
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,
+          ice: item.ice,
+          sweetness: item.sweetness,
         })),
       });
       // Reset

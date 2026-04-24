@@ -194,6 +194,8 @@ export default function Kiosk() {
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,
+          ice: item.ice,
+          sweetness: item.sweetness,
         })),
       });
       // Reset
