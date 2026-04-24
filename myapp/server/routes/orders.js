@@ -138,7 +138,7 @@ router.post('/', async (req, res) => {
 
       if (customerRes.rows.length > 0) {
         const customer = customerRes.rows[0];
-        const currentPoints = (customer.points || 0) + newPoints;
+        const currentPoints = (parseInt(customer.points, 10) || 0) + newPoints;
         const currentPastOrders = customer.past_orders || '';
         
         // Add new order to past_orders list (max 3)
@@ -186,10 +186,11 @@ router.get('/:orderId', async (req, res) => {
 
     // Get order items with details and customizations
     const itemsRes = await pool.query(
-      `SELECT od.Item_ID, od.topping_id, od.ice_level, od.sweet_level, mi.item_name, mi.price, mi.icon_config
+      `SELECT od.item_id, od.topping_id, od.ice_level, od.sweet_level, mi.item_name, mi.price, mi.icon_config, inv.name as topping_name
        FROM order_details od
-       JOIN menu_items mi ON od.Item_ID = mi.item_id
-       WHERE od.Order_ID = $1`,
+       JOIN menu_items mi ON od.item_id = mi.item_id
+       LEFT JOIN inventory inv ON od.topping_id = inv.inventory_id
+       WHERE od.order_id = $1`,
       [orderId]
     );
 
@@ -199,6 +200,7 @@ router.get('/:orderId', async (req, res) => {
       const bobaPrice = bobaInventoryId && bobaInventoryId !== -1 ? 0.5 : 0;
       const ice = iceNumToText[row.ice_level] || 'Regular Ice';
       const sweetness = sweetNumToText[row.sweet_level] || 'Regular Sweet';
+      const bobaName = row.topping_name || 'No Boba';
 
       return {
         baseItemId: row.item_id,
@@ -206,7 +208,7 @@ router.get('/:orderId', async (req, res) => {
         basePrice: parseFloat(row.price),
         iconConfig: row.icon_config,
         bobaInventoryId,
-        boba: bobaInventoryId && bobaInventoryId !== -1 ? 'Selected Topping' : 'No Boba',
+        boba: bobaInventoryId && bobaInventoryId !== -1 ? bobaName : 'No Boba',
         bobaPrice,
         ice,
         sweetness,

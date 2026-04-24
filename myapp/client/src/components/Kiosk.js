@@ -35,6 +35,9 @@ export default function Kiosk() {
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  // Track which past orders have been reordered (for toggle behavior)
+  const [reorderedOrderIds, setReorderedOrderIds] = useState(new Set());
 
   // ── Derived values ─────────────────────────────────────────────────
   const subtotal = orderItems.reduce(
@@ -72,17 +75,22 @@ export default function Kiosk() {
     // Fetch past orders if customer has any
     if (customerData && customerData.past_orders) {
       const orderIds = customerData.past_orders.split(',').map(id => id.trim()).filter(id => id);
+      console.log('Fetching past orders:', orderIds);
       fetchPastOrders(orderIds);
+    } else {
+      console.log('No past orders for customer:', customerData);
     }
   };
 
   const fetchPastOrders = async (orderIds) => {
     try {
+      console.log('Attempting to fetch orders:', orderIds);
       const orders = await Promise.all(
         orderIds.map(orderId =>
           axios.get(`${API}/orders/${orderId}`)
         )
       );
+      console.log('Fetched orders:', orders.map(r => r.data));
       setPastOrders(orders.map(r => r.data));
     } catch (err) {
       console.error('Failed to fetch past orders:', err);
@@ -91,24 +99,38 @@ export default function Kiosk() {
 
   const handleReorderClick = async (pastOrderId) => {
     try {
-      const response = await axios.get(`${API}/orders/${pastOrderId}`);
-      const { items } = response.data;
-      
-      // Add all items from past order to current order
-      setOrderItems(prev => [
-        ...items.map(item => ({
-          baseItemId: item.baseItemId,
-          name: item.name,
-          basePrice: item.basePrice,
-          bobaInventoryId: item.bobaInventoryId,
-          boba: item.boba,
-          bobaPrice: item.bobaPrice,
-          ice: item.ice,
-          sweetness: item.sweetness,
-          iconConfig: item.iconConfig,
-        })),
-        ...prev
-      ]);
+      // Check if this order is already reordered
+      if (reorderedOrderIds.has(pastOrderId)) {
+        // Remove items from this order
+        setOrderItems(prev => prev.filter(item => item._reorderedFrom !== pastOrderId));
+        setReorderedOrderIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(pastOrderId);
+          return newSet;
+        });
+      } else {
+        // Add items from this order
+        const response = await axios.get(`${API}/orders/${pastOrderId}`);
+        const { items } = response.data;
+        
+        setOrderItems(prev => [
+          ...items.map(item => ({
+            baseItemId: item.baseItemId,
+            name: item.name,
+            basePrice: item.basePrice,
+            bobaInventoryId: item.bobaInventoryId,
+            boba: item.boba,
+            bobaPrice: item.bobaPrice,
+            ice: item.ice,
+            sweetness: item.sweetness,
+            iconConfig: item.iconConfig,
+            _reorderedFrom: pastOrderId, // Track which past order this came from
+          })),
+          ...prev
+        ]);
+        
+        setReorderedOrderIds(prev => new Set(prev).add(pastOrderId));
+      }
       
       setView('ITEMS');
     } catch (err) {
@@ -279,6 +301,41 @@ export default function Kiosk() {
 
             {/* Continuous Scroll Items */}
             <div className="items-scroll-container">
+              {/* Past Orders Section */}
+              {customer && pastOrders.length > 0 && (
+                <div className="past-orders-section">
+                  <h2 className="items-title">Your Past Orders</h2>
+                  <div className="past-orders-grid">
+                    {pastOrders.map((order, idx) => (
+                      <div key={idx} className="past-order-card">
+                        <div className="past-order-header">
+                          <span className="past-order-label">Order #{order.order_id}</span>
+                        </div>
+                        <div className="past-order-items">
+                          {order.items.slice(0, 3).map((item, itemIdx) => (
+                            <div key={itemIdx} className="past-order-item">
+                              <span className="item-name-compact">{item.name}</span>
+                              {item.boba !== 'No Boba' && (
+                                <span className="item-addon">+ {item.boba}</span>
+                              )}
+                            </div>
+                          ))}
+                          {order.items.length > 3 && (
+                            <span className="items-more">+{order.items.length - 3} more</span>
+                          )}
+                        </div>
+                        <button
+                          className={`reorder-btn ${reorderedOrderIds.has(order.order_id) ? 'active' : ''}`}
+                          onClick={() => handleReorderClick(order.order_id)}
+                        >
+                          {reorderedOrderIds.has(order.order_id) ? 'Remove' : 'Reorder'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {categories.map((category) => {
                 const itemsInCategory = menuItems.filter(i => i.item_category === category);
                 if (itemsInCategory.length === 0) return null;

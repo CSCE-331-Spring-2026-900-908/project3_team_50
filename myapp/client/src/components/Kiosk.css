@@ -456,6 +456,103 @@
   font-size: .95rem;
 }
 
+/* ── Past Orders Section ────────────────────────────────────────────── */
+.past-orders-section {
+  margin-bottom: 24px;
+}
+
+.past-orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.past-order-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08) 0%, rgba(255, 30, 144, 0.08) 100%);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-klg);
+  transition: all .2s var(--ease-out);
+}
+
+.past-order-card:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(255, 30, 144, 0.15) 100%);
+  box-shadow: var(--shadow-md);
+  border-color: var(--clr-primary);
+  transform: translateY(-2px);
+}
+
+.past-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.past-order-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.past-order-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-height: 30px;
+}
+
+.past-order-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.8rem;
+}
+
+.item-name-compact {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.item-addon {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.items-more {
+  font-size: 0.75rem;
+  color: var(--clr-primary);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.reorder-btn {
+  padding: 8px 12px;
+  background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-accent) 100%);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-kmd);
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all .2s var(--ease-out);
+  white-space: nowrap;
+}
+
+.reorder-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.reorder-btn:active {
+  transform: translateY(0);
+}
+
 /* ── Addons View ───────────────────────────────────────────────────── */
 .addons-view {
   display: flex;
