@@ -29,6 +29,15 @@ export default function Kiosk() {
   const [customTipInput, setCustomTipInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [chatInput, setChatInput] = useState('');
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [chatMessages, setChatMessages] = useState([
+    {
+      role: 'assistant',
+      text: 'Hi! Tell me what flavors or caffeine level you like, and I can recommend drinks.',
+      recommendations: [],
+    },
+  ]);
 
   // ── Derived values ─────────────────────────────────────────────────
   const subtotal = orderItems.reduce(
@@ -132,6 +141,58 @@ export default function Kiosk() {
       alert('Checkout failed: ' + (err.response?.data?.error || err.message));
     } finally {
       setIsProcessing(false);
+    }
+  };
+
+  const addRecommendedItemToOrder = (recommendation) => {
+    const normalizedName = String(recommendation?.name || '').trim().toLowerCase();
+    const menuMatch = menuItems.find((item) => {
+      const itemName = String(item.item_name || '').trim().toLowerCase();
+      return item.item_id === recommendation?.itemId || itemName === normalizedName;
+    });
+
+    if (!menuMatch) {
+      alert('That recommended item is not currently available in the kiosk menu.');
+      return;
+    }
+
+    addItemToOrder(menuMatch);
+  };
+
+  const submitChatPrompt = async () => {
+    const trimmedInput = chatInput.trim();
+    if (!trimmedInput || isChatLoading) return;
+
+    const userMessage = { role: 'user', text: trimmedInput, recommendations: [] };
+    setChatMessages((prev) => [...prev, userMessage]);
+    setChatInput('');
+    setIsChatLoading(true);
+
+    try {
+      const response = await axios.post(`${API}/chatbot/recommend`, {
+        preferences: trimmedInput,
+      });
+
+      const assistantMessage = {
+        role: 'assistant',
+        text: response.data?.message || 'Here are some recommendations for you.',
+        recommendations: Array.isArray(response.data?.recommendations)
+          ? response.data.recommendations
+          : [],
+      };
+
+      setChatMessages((prev) => [...prev, assistantMessage]);
+    } catch (err) {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          text: err.response?.data?.error || 'Sorry, I could not get recommendations right now.',
+          recommendations: [],
+        },
+      ]);
+    } finally {
+      setIsChatLoading(false);
     }
   };
 
@@ -381,9 +442,77 @@ export default function Kiosk() {
         >
           Checkout
         </button>
+
+        <ChatbotPanel
+          chatInput={chatInput}
+          setChatInput={setChatInput}
+          onSubmit={submitChatPrompt}
+          isLoading={isChatLoading}
+          messages={chatMessages}
+          onAddRecommendation={addRecommendedItemToOrder}
+        />
       </aside>
       </div>
     </div>
+  );
+}
+
+function ChatbotPanel({
+  chatInput,
+  setChatInput,
+  onSubmit,
+  isLoading,
+  messages,
+  onAddRecommendation,
+}) {
+  return (
+    <section className="kiosk-chatbot-panel" aria-label="Kiosk recommendation assistant">
+      <h4 className="kiosk-chatbot-title">Assistant</h4>
+      <div className="kiosk-chatbot-messages" aria-live="polite">
+        {messages.map((message, index) => (
+          <div key={`${message.role}-${index}`} className={`chat-message ${message.role}`}>
+            <p>{message.text}</p>
+            {message.role === 'assistant' && Array.isArray(message.recommendations) && message.recommendations.length > 0 && (
+              <div className="chat-recommendations">
+                {message.recommendations.map((rec, recIndex) => (
+                  <div key={`${rec.name}-${recIndex}`} className="chat-recommendation-card">
+                    <div className="chat-recommendation-meta">
+                      <span className="chat-recommendation-name">{rec.name}</span>
+                      {typeof rec.price === 'number' && (
+                        <span className="chat-recommendation-price">${rec.price.toFixed(2)}</span>
+                      )}
+                    </div>
+                    {rec.reason && <span className="chat-recommendation-reason">{rec.reason}</span>}
+                    <button
+                      type="button"
+                      className="chat-add-btn"
+                      onClick={() => onAddRecommendation(rec)}
+                    >
+                      Add to Order
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+        {isLoading && <p className="chat-loading">Thinking...</p>}
+      </div>
+      <div className="kiosk-chatbot-input-row">
+        <input
+          type="text"
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
+          placeholder="e.g. fruity, low caffeine"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSubmit();
+          }}
+        />
+        <button type="button" onClick={onSubmit} disabled={isLoading || !chatInput.trim()}>
+          Send
+        </button>
+      </div>
+    </section>
   );
 }
 
