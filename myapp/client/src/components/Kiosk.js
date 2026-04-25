@@ -465,9 +465,27 @@ function ChatbotPanel({
   messages,
   onAddRecommendation,
 }) {
+  const quickPrompts = [
+    'fruity low caffeine',
+    'sweet milk tea',
+    'something refreshing',
+  ];
+
   return (
     <section className="kiosk-chatbot-panel" aria-label="Kiosk recommendation assistant">
       <h4 className="kiosk-chatbot-title">Assistant</h4>
+      <div className="kiosk-chatbot-quick-prompts" aria-label="Quick prompt suggestions">
+        {quickPrompts.map((prompt) => (
+          <button
+            key={prompt}
+            type="button"
+            className="chat-quick-btn"
+            onClick={() => setChatInput(prompt)}
+          >
+            {prompt}
+          </button>
+        ))}
+      </div>
       <div className="kiosk-chatbot-messages" aria-live="polite">
         {messages.map((message, index) => (
           <div key={`${message.role}-${index}`} className={`chat-message ${message.role}`}>
@@ -486,6 +504,7 @@ function ChatbotPanel({
                     <button
                       type="button"
                       className="chat-add-btn"
+                      aria-label={`Add ${rec.name} to order`}
                       onClick={() => onAddRecommendation(rec)}
                     >
                       Add to Order
@@ -504,11 +523,17 @@ function ChatbotPanel({
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
           placeholder="e.g. fruity, low caffeine"
+          aria-label="Describe your drink preferences"
           onKeyDown={(e) => {
             if (e.key === 'Enter') onSubmit();
           }}
         />
-        <button type="button" onClick={onSubmit} disabled={isLoading || !chatInput.trim()}>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={isLoading || !chatInput.trim()}
+          aria-label="Send recommendation request"
+        >
           Send
         </button>
       </div>

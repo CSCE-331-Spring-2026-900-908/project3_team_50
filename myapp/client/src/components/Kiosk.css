@@ -929,6 +929,27 @@
   color: var(--text-primary);
 }
 
+.kiosk-chatbot-quick-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chat-quick-btn {
+  border: 1px solid var(--border-default);
+  border-radius: 999px;
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.chat-quick-btn:hover {
+  border-color: var(--clr-primary);
+  color: var(--clr-primary);
+}
+
 .kiosk-chatbot-messages {
   max-height: 220px;
   overflow-y: auto;
