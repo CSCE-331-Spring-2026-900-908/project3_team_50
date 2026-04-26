@@ -685,6 +685,8 @@ function CheckoutPanel({
   const availablePoints = customer?.points || 0;
   const pointsDiscount = pointsToRedeem / 10;
   const total = totalAfterDiscount + tip;
+  const maxPointsByDiscount = Math.ceil(subtotal) * 10;
+   const effectiveMaxPoints = Math.min(availablePoints, maxPointsByDiscount);
 
   const handleApplyPoints = () => {
     const points = parseInt(pointsInput, 10);
@@ -772,7 +774,7 @@ function CheckoutPanel({
 
           {showPointsInput && pointsToRedeem === 0 && (
             <div className="points-input-group">
-              <p className="points-ratio">10 points = $1 off • Redeemable in multiples of 10</p>
+              <p className="points-ratio">10 points = $1 off • Max: ${(effectiveMaxPoints / 10).toFixed(0)}</p>
               <div className="points-controls">
                 <input
                   type="number"
@@ -781,7 +783,7 @@ function CheckoutPanel({
                   onChange={(e) => setPointsInput(e.target.value)}
                   min="0"
                   step="10"
-                  max={availablePoints}
+                  max={effectiveMaxPoints}
                 />
                 <button 
                   className="points-apply"
