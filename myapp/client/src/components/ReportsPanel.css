@@ -64,6 +64,33 @@
   gap: 8px;
 }
 
+.reports-buttons .action-btn {
+  position: relative;
+}
+
+.reports-buttons .action-btn.reports-active {
+  background: linear-gradient(135deg, var(--clr-primary), var(--clr-accent));
+  border-color: rgba(255, 255, 255, 0.34);
+  color: #fff;
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+
+.reports-buttons .action-btn.reports-active::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 5px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+}
+
+.reports-buttons .action-btn:disabled {
+  cursor: wait;
+}
+
 .reports-center {
   padding: 16px;
   display: flex;

@@ -21,6 +21,16 @@ export default function EmployeeManagement() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  const flashError = useCallback((msg) => {
+    setError(msg);
+    setTimeout(() => setError(''), 4000);
+  }, []);
+
+  const flashSuccess = useCallback((msg) => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(''), 3000);
+  }, []);
+
   const loadEmployees = useCallback(async () => {
     setLoading(true);
     try {
@@ -32,7 +42,7 @@ export default function EmployeeManagement() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [flashError]);
 
   useEffect(() => {
     loadEmployees();
@@ -55,16 +65,6 @@ export default function EmployeeManagement() {
       }
     }
   }, [selectedId, employees, modal]);
-
-  const flashError = (msg) => {
-    setError(msg);
-    setTimeout(() => setError(''), 4000);
-  };
-
-  const flashSuccess = (msg) => {
-    setSuccess(msg);
-    setTimeout(() => setSuccess(''), 3000);
-  };
 
   const openAdd = () => {
     setForm({ name: '', role: 'Cashier', hourly_rate: '', pin: '' });
@@ -168,120 +168,142 @@ export default function EmployeeManagement() {
           </p>
         </div>
         <Link className="action-btn back-link-btn" to="/manager-dashboard">
-          ← Back to Dashboard
+          Back to Dashboard
         </Link>
         {error && <div className="toast toast-error">{error}</div>}
         {success && <div className="toast toast-success">{success}</div>}
       </div>
 
-      <div className="table-wrapper glass-card">
-        <table className="mgmt-table" id="employee-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Hourly Rate</th>
-              <th>PIN</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td colSpan="5" className="table-loading">Loading…</td>
-              </tr>
-            ) : employees.length === 0 ? (
-              <tr>
-                <td colSpan="5" className="table-loading">No employees found.</td>
-              </tr>
-            ) : (
-              employees.map((emp) => (
-                <tr
-                  key={emp.employee_id}
-                  className={selectedId === emp.employee_id ? 'selected' : ''}
-                  onClick={() =>
-                    setSelectedId(selectedId === emp.employee_id ? null : emp.employee_id)
-                  }
-                >
-                  <td>{emp.employee_id}</td>
-                  <td>{emp.name}</td>
-                  <td>
-                    <span className="cat-chip">{emp.role}</span>
-                  </td>
-                  <td className="price-cell">${Number(emp.hourly_rate).toFixed(2)}</td>
-                  <td className="pin-cell">{emp.pin != null && emp.pin !== '' ? String(emp.pin) : '—'}</td>
+      <div className="mgmt-main-content">
+        <div className="mgmt-left-panel">
+          <div className="table-wrapper glass-card">
+            <table className="mgmt-table" id="employee-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Hourly Rate</th>
+                  <th>PIN</th>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="table-loading">Loading...</td>
+                  </tr>
+                ) : employees.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="table-loading">No employees found.</td>
+                  </tr>
+                ) : (
+                  employees.map((emp) => (
+                    <tr
+                      key={emp.employee_id}
+                      className={selectedId === emp.employee_id ? 'selected' : ''}
+                      onClick={() =>
+                        setSelectedId(selectedId === emp.employee_id ? null : emp.employee_id)
+                      }
+                    >
+                      <td>{emp.employee_id}</td>
+                      <td>{emp.name}</td>
+                      <td>
+                        <span className="cat-chip">{emp.role}</span>
+                      </td>
+                      <td className="price-cell">${Number(emp.hourly_rate).toFixed(2)}</td>
+                      <td className="pin-cell">{emp.pin != null && emp.pin !== '' ? String(emp.pin) : '-'}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
 
-      <div className="mgmt-actions">
-        <button type="button" className="action-btn refresh" onClick={loadEmployees}>
-          ↻ Refresh
-        </button>
-        <button type="button" className="action-btn add" onClick={openAdd}>
-          + Add Employee
-        </button>
-        <button type="button" className="action-btn edit" onClick={openEdit}>
-          ✎ Update Selected
-        </button>
-        <button type="button" className="action-btn delete" onClick={handleFire}>
-          Fire Selected
-        </button>
-      </div>
+          <div className="mgmt-actions">
+            <button type="button" className="action-btn refresh" onClick={loadEmployees}>
+              Refresh
+            </button>
+            <button type="button" className="action-btn add" onClick={openAdd}>
+              + Add Employee
+            </button>
+            <button
+              type="button"
+              className="action-btn edit"
+              onClick={openEdit}
+              disabled={selectedId === null}
+            >
+              Update Selected
+            </button>
+            <button
+              type="button"
+              className="action-btn delete"
+              onClick={handleFire}
+              disabled={selectedId === null}
+            >
+              Fire Selected
+            </button>
+          </div>
+        </div>
 
-      {modal && (
-        <div className="modal-overlay" onClick={() => setModal(null)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2>{modal === 'add' ? 'Add Employee' : 'Update Employee'}</h2>
+        {modal && (
+          <div className="mgmt-right-panel glass-card">
+            <div className="mgmt-form-header">
+              <h2>{modal === 'add' ? 'Add Employee' : 'Update Employee'}</h2>
+              <button type="button" className="mgmt-close-btn" onClick={() => setModal(null)}>
+                &times;
+              </button>
+            </div>
 
-            <label>
-              Name
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </label>
+            <div className="mgmt-form-body">
+              <label>
+                Name
+                <input
+                  type="text"
+                  placeholder="e.g. Jamie Lee"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </label>
 
-            <label>
-              Role
-              <select
-                value={form.role}
-                onChange={(e) => setForm({ ...form, role: e.target.value })}
-              >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
-            </label>
+              <label>
+                Role
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                >
+                  {ROLES.map((r) => (
+                    <option key={r} value={r}>
+                      {r}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label>
-              Hourly rate ($)
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                value={form.hourly_rate}
-                onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })}
-              />
-            </label>
+              <label>
+                Hourly rate ($)
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="e.g. 15.50"
+                  value={form.hourly_rate}
+                  onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })}
+                />
+              </label>
 
-            <label>
-              PIN
-              <input
-                type="password"
-                autoComplete="new-password"
-                value={form.pin}
-                onChange={(e) => setForm({ ...form, pin: e.target.value })}
-              />
-            </label>
+              <label>
+                PIN
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Staff login PIN"
+                  value={form.pin}
+                  onChange={(e) => setForm({ ...form, pin: e.target.value })}
+                />
+              </label>
+            </div>
 
-            <div className="modal-btns">
+            <div className="mgmt-form-footer">
               <button type="button" className="modal-cancel" onClick={() => setModal(null)}>
                 Cancel
               </button>
@@ -290,12 +312,12 @@ export default function EmployeeManagement() {
                 className="modal-confirm"
                 onClick={modal === 'add' ? handleAdd : handleUpdate}
               >
-                {modal === 'add' ? 'Add' : 'Save'}
+                {modal === 'add' ? 'Add Employee' : 'Save Changes'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
