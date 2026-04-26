@@ -143,7 +143,7 @@ export default function useGoogleTranslate() {
     applyLanguage(langCode);
     setLanguage(langCode);
 
-    // Force a full refresh so Google applies translation consistently.
+    // Full refresh ensures Google widget applies translation consistently.
     window.setTimeout(() => {
       window.location.reload();
     }, 250);

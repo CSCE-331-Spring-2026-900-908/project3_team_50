@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from 'react-router-dom';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
 import InventoryManagement from './components/InventoryManagement';
@@ -13,16 +13,74 @@ import useGoogleTranslate from './i18n/Translate';
 import FontSizePicker from './components/FontSizePicker';
 import './App.css';
 
+const KIOSK_CUSTOMER_STORAGE_KEY = 'kioskCustomer';
+const KIOSK_LOGIN_OPEN_STORAGE_KEY = 'isKioskLoginOpen';
+
+function KioskExitRoute({ onExit }) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    onExit();
+    navigate('/', { replace: true });
+  }, [navigate, onExit]);
+
+  return null;
+}
+
 function App() {
-  const [user, setUser] = useState(null);
-  const [kioskCustomer, setKioskCustomer] = useState(null);
-  const [isKioskLoginOpen, setIsKioskLoginOpen] = useState(true);
+  const parseStoredJson = (storageKey) => {
+    try {
+      const value = localStorage.getItem(storageKey);
+      return value ? JSON.parse(value) : null;
+    } catch (error) {
+      localStorage.removeItem(storageKey);
+      return null;
+    }
+  };
+
+  const [user, setUser] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      localStorage.removeItem('user');
+      return null;
+    }
+  });
+  const [kioskCustomer, setKioskCustomer] = useState(() => parseStoredJson(KIOSK_CUSTOMER_STORAGE_KEY));
+  const [isKioskLoginOpen, setIsKioskLoginOpen] = useState(() => {
+    const stored = localStorage.getItem(KIOSK_LOGIN_OPEN_STORAGE_KEY);
+    if (stored === null) return true;
+    return stored === 'true';
+  });
   const { language, setLanguage, supportedLanguages, isTranslating } = useGoogleTranslate();
+
+  const handleKioskCustomerChange = (customer) => {
+    setKioskCustomer(customer);
+    if (customer) {
+      localStorage.setItem(KIOSK_CUSTOMER_STORAGE_KEY, JSON.stringify(customer));
+      localStorage.setItem(KIOSK_LOGIN_OPEN_STORAGE_KEY, 'false');
+    } else {
+      localStorage.removeItem(KIOSK_CUSTOMER_STORAGE_KEY);
+      localStorage.setItem(KIOSK_LOGIN_OPEN_STORAGE_KEY, 'true');
+    }
+  };
+
+  const handleKioskLoginStateChange = (isLoginOpen) => {
+    setIsKioskLoginOpen(isLoginOpen);
+    localStorage.setItem(KIOSK_LOGIN_OPEN_STORAGE_KEY, isLoginOpen ? 'true' : 'false');
+    if (isLoginOpen) {
+      localStorage.removeItem(KIOSK_CUSTOMER_STORAGE_KEY);
+      setKioskCustomer(null);
+    }
+  };
 
   const handleLogout = () => {
     setUser(null);
     setKioskCustomer(null);
     localStorage.removeItem('user');
+    localStorage.removeItem(KIOSK_CUSTOMER_STORAGE_KEY);
+    localStorage.removeItem(KIOSK_LOGIN_OPEN_STORAGE_KEY);
   };
 
   const isManager = user?.role === 'Manager';
@@ -97,7 +155,18 @@ function App() {
 
               <main className="main-content">
                 <Routes>
-                  <Route path="/kiosk" element={<Kiosk onCustomerChange={setKioskCustomer} onLoginStateChange={setIsKioskLoginOpen} />} />
+                  <Route path="/exit" element={<KioskExitRoute onExit={handleLogout} />} />
+                  <Route
+                    path="/kiosk"
+                    element={(
+                      <Kiosk
+                        initialCustomer={kioskCustomer}
+                        initialShowCustomerLogin={isKioskLoginOpen}
+                        onCustomerChange={handleKioskCustomerChange}
+                        onLoginStateChange={handleKioskLoginStateChange}
+                      />
+                    )}
+                  />
                   <Route path="/" element={<Navigate to="/kiosk" replace />} />
                   <Route path="*" element={<Navigate to="/kiosk" replace />} />
                 </Routes>

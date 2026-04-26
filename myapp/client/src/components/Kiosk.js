@@ -14,15 +14,20 @@ const TAX_RATE = 0.0825;
    Kiosk — Customer ordering view
    Mirrors CashierDashboard but for customer self-service
    ═══════════════════════════════════════════════════════════════════════ */
-export default function Kiosk({ onCustomerChange, onLoginStateChange }) {
+export default function Kiosk({
+  initialCustomer = null,
+  initialShowCustomerLogin = true,
+  onCustomerChange,
+  onLoginStateChange
+}) {
   // ── State ──────────────────────────────────────────────────────────
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [bobaToppings, setBobaToppings] = useState([]);
 
   // Customer state
-  const [customer, setCustomer] = useState(null);
-  const [showCustomerLogin, setShowCustomerLogin] = useState(true);
+  const [customer, setCustomer] = useState(initialCustomer);
+  const [showCustomerLogin, setShowCustomerLogin] = useState(initialShowCustomerLogin);
   const [pastOrders, setPastOrders] = useState([]);
 
   // Order state
