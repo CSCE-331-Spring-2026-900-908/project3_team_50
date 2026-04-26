@@ -1,6 +1,34 @@
 const express = require('express');
 const router = express.Router();
 
+async function ensureRecipeQuantityColumn(clientOrPool) {
+  await clientOrPool.query(`
+    ALTER TABLE menu_items_junction
+    ADD COLUMN IF NOT EXISTS quantity_used NUMERIC DEFAULT 1
+  `);
+}
+
+function normalizeIngredientRows(ingredientInput = []) {
+  return ingredientInput
+    .map((entry) => {
+      if (typeof entry === 'object' && entry !== null) {
+        const ingredientId = parseInt(entry.ingredient_id ?? entry.id, 10);
+        const quantityUsed = Number(entry.quantity_used ?? entry.quantity ?? 1);
+        return {
+          ingredient_id: ingredientId,
+          quantity_used: Number.isFinite(quantityUsed) && quantityUsed > 0 ? quantityUsed : 1,
+        };
+      }
+
+      const ingredientId = parseInt(entry, 10);
+      return {
+        ingredient_id: ingredientId,
+        quantity_used: 1,
+      };
+    })
+    .filter((entry) => Number.isInteger(entry.ingredient_id));
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 //  GET /api/menu/categories
 //  → Distinct item categories (mirrors CashierDashboard.getCategories)
@@ -28,17 +56,31 @@ router.get('/items', async (req, res) => {
   const { category } = req.query;
 
   try {
+    await ensureRecipeQuantityColumn(pool);
     let sql, params;
     if (category) {
       sql = 'SELECT item_id, item_name, item_category, price, icon_config FROM menu_items WHERE item_category = $1 AND COALESCE(is_archived, false) = false ORDER BY item_id';
       params = [category];
     } else {
-      // Full menu view with ingredient IDs (mirrors MenuManagementPanel.loadMenuItems)
+      // Full menu view with ingredient details for manager recipe editing.
       sql = `
         SELECT m.item_id, m.item_name, m.item_category, m.price, m.icon_config,
-               STRING_AGG(CAST(j.ingredient_id AS TEXT), ', ' ORDER BY j.ingredient_id) AS ingredients
+               STRING_AGG(CAST(j.ingredient_id AS TEXT), ', ' ORDER BY j.ingredient_id) AS ingredients,
+               COALESCE(
+                 JSON_AGG(
+                   JSON_BUILD_OBJECT(
+                     'ingredient_id', i.inventory_id,
+                     'name', i.name,
+                     'quantity_used', COALESCE(j.quantity_used, 1),
+                     'unit', i.unit
+                   )
+                   ORDER BY i.name
+                 ) FILTER (WHERE i.inventory_id IS NOT NULL),
+                 '[]'::json
+               ) AS ingredient_details
         FROM menu_items m
         LEFT JOIN menu_items_junction j ON m.item_id = j.menu_item_id
+        LEFT JOIN inventory i ON j.ingredient_id = i.inventory_id
         WHERE COALESCE(m.is_archived, false) = false
         GROUP BY m.item_id, m.item_name, m.item_category, m.price, m.icon_config
         ORDER BY m.item_id`;
@@ -81,11 +123,12 @@ router.get('/boba', async (req, res) => {
 // ═══════════════════════════════════════════════════════════════════════
 router.post('/items', async (req, res) => {
   const pool = req.app.locals.pool;
-  const { item_name, item_category, price, ingredient_ids, icon_config } = req.body;
+  const { item_name, item_category, price, ingredient_ids, ingredients, icon_config } = req.body;
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
+    await ensureRecipeQuantityColumn(client);
 
     // 1. Get next ID
     const idResult = await client.query('SELECT COALESCE(MAX(item_id), 0) + 1 AS next_id FROM menu_items');
@@ -98,11 +141,15 @@ router.post('/items', async (req, res) => {
     );
 
     // 3. Insert junction rows
-    if (ingredient_ids && ingredient_ids.length > 0) {
-      for (const ingId of ingredient_ids) {
+    const ingredientRows = normalizeIngredientRows(ingredients || ingredient_ids);
+    if (ingredientRows.length > 0) {
+      for (const ingredient of ingredientRows) {
         await client.query(
-          'INSERT INTO menu_items_junction (menu_item_id, ingredient_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-          [nextId, ingId]
+          `INSERT INTO menu_items_junction (menu_item_id, ingredient_id, quantity_used)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (menu_item_id, ingredient_id)
+           DO UPDATE SET quantity_used = EXCLUDED.quantity_used`,
+          [nextId, ingredient.ingredient_id, ingredient.quantity_used]
         );
       }
     }
@@ -125,11 +172,12 @@ router.post('/items', async (req, res) => {
 router.put('/items/:id', async (req, res) => {
   const pool = req.app.locals.pool;
   const { id } = req.params;
-  const { item_name, item_category, price, ingredient_ids, icon_config } = req.body;
+  const { item_name, item_category, price, ingredient_ids, ingredients, icon_config } = req.body;
   const client = await pool.connect();
 
   try {
     await client.query('BEGIN');
+    await ensureRecipeQuantityColumn(client);
 
     // 1. Update menu item
     await client.query(
@@ -139,11 +187,15 @@ router.put('/items/:id', async (req, res) => {
 
     // 2. Replace junction rows
     await client.query('DELETE FROM menu_items_junction WHERE menu_item_id = $1', [id]);
-    if (ingredient_ids && ingredient_ids.length > 0) {
-      for (const ingId of ingredient_ids) {
+    const ingredientRows = normalizeIngredientRows(ingredients || ingredient_ids);
+    if (ingredientRows.length > 0) {
+      for (const ingredient of ingredientRows) {
         await client.query(
-          'INSERT INTO menu_items_junction (menu_item_id, ingredient_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
-          [id, ingId]
+          `INSERT INTO menu_items_junction (menu_item_id, ingredient_id, quantity_used)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (menu_item_id, ingredient_id)
+           DO UPDATE SET quantity_used = EXCLUDED.quantity_used`,
+          [id, ingredient.ingredient_id, ingredient.quantity_used]
         );
       }
     }
