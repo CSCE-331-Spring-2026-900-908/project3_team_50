@@ -55,13 +55,13 @@
   background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
   border: 1px solid rgba(255, 193, 7, 0.2);
   border-radius: var(--radius-klg);
-  padding: 12px 20px;
+  padding: clamp(8px, 1vw, 12px) clamp(12px, 1.5vw, 20px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
   grid-column: 1 / -1;
-  margin-bottom: 8px;
+  margin-bottom: clamp(4px, 1vw, 8px);
 }
 
 .customer-info-left {
@@ -199,8 +199,8 @@
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-rows: 1fr auto;
-  gap: 24px;
-  padding: 24px;
+  gap: clamp(8px, 1.5vw, 16px);
+  padding: clamp(4px, .5vw, 6px);
   overflow: hidden;
   position: relative;
 }
@@ -231,8 +231,8 @@
 
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: clamp(12px, 1.5vw, 20px);
   flex: 1;
   align-content: start;
 }
@@ -263,13 +263,13 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  padding: 24px 16px;
+  padding: clamp(12px, 2vw, 24px) 16px;
   border: 2px solid var(--border-subtle);
   background: var(--bg-surface);
   border-radius: var(--radius-klg);
   transition: all .3s var(--ease-out);
   cursor: pointer;
-  min-height: 180px;
+  min-height: clamp(120px, 15vh, 180px);
 }
 
 .category-box:hover {
@@ -305,8 +305,8 @@
 
 /* Compact category nav sidebar */
 .kiosk-sidebar-nav {
-  width: 130px;
-  flex-shrink: 0;
+  flex: 0 0 clamp(100px, 12vw, 130px);
+  width: clamp(100px, 12vw, 130px);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -394,8 +394,8 @@
 
 .items-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(8px, 1vw, 10px);
   flex: 1;
   align-content: start;
 }
@@ -405,14 +405,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 12px 10px;
+  padding: clamp(8px, 1vw, 12px) 10px;
   gap: 6px;
   border: 1px solid var(--border-subtle);
   background: var(--bg-glass);
   border-radius: var(--radius-klg);
   transition: all .2s var(--ease-out);
   cursor: pointer;
-  min-height: 80px;
+  min-height: clamp(60px, 8vh, 80px);
 }
 
 .item-card:hover {
@@ -648,16 +648,20 @@
 }
 
 .done-btn {
-  padding: 14px 28px;
+  padding: 16px 28px;
   border-radius: var(--radius-kmd);
   border: none;
   background: var(--clr-primary);
   color: #fff;
   font-weight: 700;
-  font-size: 1rem;
-  align-self: flex-start;
+  font-size: 1.1rem;
+  width: 100%;
+  position: sticky;
+  bottom: -8px;
+  z-index: 10;
+  margin-top: auto;
   transition: all .25s var(--ease-out);
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 -8px 24px var(--bg-surface), var(--shadow-glow);
 }
 
 .done-btn:hover {
@@ -944,7 +948,7 @@
   min-width: 220px;
   display: flex;
   flex-direction: column;
-  padding: 16px;
+  padding: clamp(10px, 1.5vw, 16px);
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-klg);
@@ -1359,100 +1363,71 @@
   color: var(--clr-primary);
 }
 
-/* ── Points Section in Checkout ───────────────────────────────────── */
-.points-section {
-  margin: 24px 0;
-  padding: 20px;
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 152, 0, 0.1));
+/* ── Points Section in Checkout (Inline) ────────────────────────────── */
+.points-inline-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 10px 12px;
+  background: rgba(255, 193, 7, 0.08);
   border: 1px solid rgba(255, 193, 7, 0.2);
   border-radius: var(--radius-kmd);
 }
 
-.points-header {
+.points-inline-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
 
-.points-header h3 {
-  margin: 0;
-  font-size: 1rem;
+.points-label {
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--text-primary);
 }
 
-.available-points {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.use-points-btn {
+.use-points-btn-inline {
   width: 100%;
-  padding: 12px 16px;
+  padding: 8px 12px;
   border: 1px solid rgba(255, 193, 7, 0.4);
-  border-radius: var(--radius-kmd);
+  border-radius: var(--radius-ksm);
   background: rgba(255, 193, 7, 0.15);
   color: var(--text-primary);
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.use-points-btn:hover {
+.use-points-btn-inline:hover {
   background: rgba(255, 193, 7, 0.25);
   border-color: rgba(255, 193, 7, 0.6);
 }
 
-.points-input-group {
+.points-inline-controls {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  gap: 6px;
 }
 
-.points-ratio {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  text-align: center;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-ksm);
-}
-
-.points-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.points-controls input {
+.points-inline-controls input {
   flex: 1;
-  padding: 10px 12px;
-  border-radius: var(--radius-kmd);
+  padding: 8px 10px;
+  border-radius: var(--radius-ksm);
   border: 1px solid var(--border-default);
   background: var(--bg-glass);
   color: var(--text-primary);
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.points-controls input:focus {
-  outline: none;
-  border-color: var(--clr-primary);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  font-size: 0.85rem;
 }
 
 .points-apply,
 .points-cancel {
-  padding: 10px 14px;
-  border-radius: var(--radius-kmd);
+  padding: 8px 12px;
+  border-radius: var(--radius-ksm);
   border: none;
   font-weight: 600;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
 .points-apply {
@@ -1462,7 +1437,6 @@
 
 .points-apply:hover {
   background: var(--clr-primary-hover);
-  transform: translateY(-1px);
 }
 
 .points-cancel {
@@ -1475,22 +1449,33 @@
   color: var(--text-primary);
 }
 
-.clear-points {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  border-radius: var(--radius-kmd);
-  background: rgba(244, 63, 94, 0.05);
-  color: var(--text-primary);
-  font-weight: 500;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.2s;
+.points-inline-redeemed {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(136, 176, 75, 0.1);
+  border: 1px solid rgba(136, 176, 75, 0.3);
+  padding: 6px 10px;
+  border-radius: var(--radius-ksm);
 }
 
-.clear-points:hover {
-  background: rgba(244, 63, 94, 0.15);
-  border-color: rgba(244, 63, 94, 0.5);
+.points-redeemed-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--clr-success);
+}
+
+.clear-points-inline {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.clear-points-inline:hover {
+  color: var(--clr-danger);
 }
 
 /* ── Discount Row in Checkout Summary ─────────────────────────────── */
@@ -1507,9 +1492,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: 100svh;
+  min-height: 100svh;
+  overflow-y: auto;
   width: 100%;
-  padding: 24px;
+  padding: clamp(12px, 2vh, 24px);
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(124, 58, 237, 0.05));
 }
 
@@ -1517,7 +1504,7 @@
   background: var(--bg-surface);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-kxl);
-  padding: 48px 40px;
+  padding: clamp(20px, 3vh, 32px) clamp(16px, 3vw, 24px);
   max-width: 420px;
   width: 100%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
@@ -1530,7 +1517,7 @@
 }
 
 .login-title {
-  font-size: 2.2rem;
+  font-size: clamp(1.5rem, 4vh, 2.2rem);
   font-weight: 800;
   color: var(--text-primary);
   margin: 0 0 8px 0;
@@ -1538,14 +1525,14 @@
 }
 
 .login-subtitle {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 2vh, 1.1rem);
   font-weight: 600;
   color: var(--text-secondary);
   margin: 0 0 12px 0;
 }
 
 .login-text {
-  font-size: .95rem;
+  font-size: clamp(0.85rem, 1.5vh, 0.95rem);
   color: var(--text-muted);
   margin: 0;
   line-height: 1.5;
@@ -1801,4 +1788,362 @@
 .points-redeemed strong {
   font-weight: 700;
   color: var(--clr-primary);
+}
+
+/* Responsive kiosk workspace */
+.kiosk-layout {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kiosk-content-wrapper {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(270px, clamp(292px, 23vw, 360px));
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(10px, 1.2vw, 18px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.kiosk-customer-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  margin: 0;
+  min-width: 0;
+}
+
+.kiosk-main {
+  grid-column: 1;
+  grid-row: 2;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+}
+
+.items-view {
+  display: grid;
+  grid-template-columns: minmax(108px, clamp(118px, 10vw, 152px)) minmax(0, 1fr);
+  gap: clamp(10px, 1.2vw, 16px);
+  height: 100%;
+  min-height: 0;
+}
+
+.kiosk-sidebar-nav {
+  width: auto;
+  min-width: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.items-scroll-container {
+  min-height: 0;
+  gap: clamp(18px, 2vh, 28px);
+  padding-right: 6px;
+}
+
+.items-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(8px, .9vw, 12px);
+}
+
+.item-card {
+  min-height: clamp(132px, 18vh, 172px);
+  padding: clamp(8px, 1vh, 12px);
+}
+
+.item-icon-wrap {
+  width: clamp(58px, 6vw, 76px);
+  height: clamp(72px, 9vh, 96px);
+}
+
+.past-orders-grid {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 190px), 1fr));
+}
+
+.kiosk-layout .order-sidebar {
+  grid-column: 2;
+  grid-row: 2;
+  width: auto;
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(12px, 1.3vw, 18px);
+}
+
+.kiosk-layout .order-items-list {
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.kiosk-layout .order-total-bar,
+.kiosk-layout .checkout-btn {
+  flex: 0 0 auto;
+}
+
+.addons-view,
+.addons-panel,
+.checkout-panel {
+  min-height: 0;
+}
+
+.addons-panel,
+.checkout-panel {
+  width: min(100%, 920px);
+  max-width: none;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.checkout-panel {
+  margin: 0 auto;
+  gap: clamp(14px, 1.8vh, 22px);
+}
+
+.checkout-summary,
+.tip-section,
+.customer-section,
+.addon-section {
+  padding: clamp(14px, 1.5vw, 20px);
+}
+
+/* Kiosk customer login should fit inside the routed content area, below nav. */
+.customer-login-modal {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: clamp(10px, 1.6vh, 18px);
+}
+
+.customer-login-box {
+  max-width: min(92vw, 500px);
+  max-height: 100%;
+  overflow: auto;
+  padding: clamp(16px, 2.2vh, 26px) clamp(18px, 2.4vw, 28px);
+}
+
+.customer-login-box .login-header {
+  margin-bottom: clamp(12px, 1.8vh, 20px);
+}
+
+.customer-login-box .login-title {
+  font-size: clamp(1.35rem, 2.7vh, 2rem);
+  line-height: 1.05;
+}
+
+.customer-login-box .login-subtitle {
+  font-size: clamp(.95rem, 1.8vh, 1.12rem);
+  line-height: 1.2;
+  margin-bottom: clamp(4px, .8vh, 8px);
+}
+
+.customer-login-box .login-text,
+.customer-login-box .login-info {
+  font-size: clamp(.78rem, 1.5vh, .92rem);
+  line-height: 1.35;
+}
+
+.customer-login-box .login-method-tabs,
+.customer-login-box .login-input-group {
+  margin-bottom: clamp(12px, 1.8vh, 20px);
+}
+
+.customer-login-box .login-btn {
+  margin-bottom: clamp(10px, 1.5vh, 14px);
+}
+
+.customer-login-box .login-divider {
+  margin: clamp(12px, 1.7vh, 18px) 0;
+}
+
+.customer-login-box .login-info {
+  margin-top: clamp(10px, 1.6vh, 16px);
+}
+
+.register-form {
+  gap: clamp(10px, 1.5vh, 16px);
+}
+
+@media (max-width: 980px) {
+  .kiosk-content-wrapper {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+  }
+
+  .kiosk-main {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .kiosk-layout .order-sidebar {
+    grid-column: 1;
+    grid-row: 3;
+    max-height: min(32vh, 250px);
+  }
+}
+
+@media (max-width: 720px) {
+  .items-view {
+    grid-template-columns: 1fr;
+  }
+
+  .kiosk-sidebar-nav {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    max-height: none;
+    padding-bottom: 4px;
+  }
+
+  .cat-nav-label {
+    display: none;
+  }
+
+  .category-nav-btn {
+    width: auto;
+    min-width: max-content;
+  }
+
+  .kiosk-customer-header,
+  .customer-info-right {
+    flex-wrap: wrap;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Compact customer/reward treatment */
+.customer-info-right {
+  margin-left: auto;
+}
+
+.logout-customer-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.logout-customer-btn:hover {
+  background: var(--clr-danger);
+  color: #fff;
+  border-color: var(--clr-danger-light);
+}
+
+.order-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.order-sidebar-header .sidebar-title {
+  margin: 0;
+}
+
+.order-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 193, 7, 0.35);
+  background: rgba(255, 193, 7, 0.12);
+  color: #9a6b00;
+  font-size: .82rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+/* Compact checkout: one continuous stack, with tip above total. */
+.kiosk-layout .checkout-panel {
+  gap: 0;
+  overflow-y: auto;
+}
+
+.kiosk-layout .checkout-panel .back-link {
+  margin-bottom: 6px;
+}
+
+.kiosk-layout .checkout-heading {
+  font-size: clamp(1.25rem, 2.4vh, 1.6rem);
+  margin-bottom: 10px;
+}
+
+.kiosk-layout .checkout-panel .tip-section,
+.kiosk-layout .checkout-panel .checkout-summary,
+.kiosk-layout .checkout-panel .customer-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0;
+  margin: 0;
+  padding: clamp(10px, 1.2vw, 14px);
+}
+
+.kiosk-layout .checkout-panel .tip-section {
+  border-radius: var(--radius-klg) var(--radius-klg) 0 0;
+  border-bottom: 0;
+}
+
+.kiosk-layout .checkout-panel .checkout-summary {
+  border-bottom: 0;
+}
+
+.kiosk-layout .checkout-panel .customer-section {
+  border-radius: 0 0 var(--radius-klg) var(--radius-klg);
+  margin-bottom: 12px;
+}
+
+.kiosk-layout .checkout-panel .tip-section h3 {
+  margin-bottom: 8px;
+  font-size: .95rem;
+}
+
+.kiosk-layout .checkout-panel .tip-btns {
+  gap: 8px;
+}
+
+.kiosk-layout .checkout-panel .tip-btn {
+  padding: 9px 8px;
+  min-width: 78px;
+}
+
+.kiosk-layout .checkout-panel .tip-custom {
+  flex-basis: 170px;
+  flex: 1 1 170px;
+  margin-top: 0;
+}
+
+.kiosk-layout .checkout-panel .summary-row {
+  font-size: .9rem;
+}
+
+.kiosk-layout .checkout-panel .summary-row.total-row {
+  font-size: 1.1rem;
+}
+
+.kiosk-layout .checkout-panel .customer-section input {
+  padding: 10px 12px;
+}
+
+.kiosk-layout .checkout-panel .pay-btn {
+  padding: 13px 16px;
 }

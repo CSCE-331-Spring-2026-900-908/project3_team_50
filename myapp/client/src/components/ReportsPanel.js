@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './ReportsPanel.css';
@@ -120,6 +120,8 @@ export default function ReportsPanel() {
   const [reportTitle, setReportTitle] = useState('Daily Reports');
   const [reportText, setReportText] = useState('Select a report below.');
   const [chartData, setChartData] = useState(null);
+  const [activeReport, setActiveReport] = useState('sales-category');
+  const loadedDefaultReport = useRef(false);
 
   const [showCustom, setShowCustom] = useState(false);
   const [customQueries, setCustomQueries] = useState([]);
@@ -144,10 +146,11 @@ export default function ReportsPanel() {
     loadCustomQueries();
   }, [loadCustomQueries]);
 
-  const runReport = async (type) => {
+  const runReport = useCallback(async (type) => {
     setLoading(true);
     setError('');
     setChartData(null);
+    setActiveReport(type);
     try {
       let res;
       switch (type) {
@@ -202,11 +205,18 @@ export default function ReportsPanel() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dateParams]);
+
+  useEffect(() => {
+    if (loadedDefaultReport.current) return;
+    loadedDefaultReport.current = true;
+    runReport('sales-category');
+  }, [runReport]);
 
   const runCustomQuery = async (id) => {
     setLoading(true);
     setError('');
+    setActiveReport(`custom-${id}`);
     try {
       const res = await axios.get(`${API}/reports/custom-queries/${id}/run`);
       const { columns, rows } = res.data;
@@ -223,6 +233,11 @@ export default function ReportsPanel() {
       setLoading(false);
     }
   };
+
+  const reportButtonClass = (type, extra = '') =>
+    ['action-btn', extra, activeReport === type ? 'reports-active' : '']
+      .filter(Boolean)
+      .join(' ');
 
   const saveCustomQuery = async () => {
     if (!newName.trim() || !newSql.trim()) return;
@@ -315,28 +330,28 @@ export default function ReportsPanel() {
 
         <div className="reports-main">
           <div className="reports-buttons">
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('sales-category')}>
+            <button type="button" className={reportButtonClass('sales-category')} disabled={loading} onClick={() => runReport('sales-category')}>
               Sales by Category
             </button>
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('top-selling')}>
+            <button type="button" className={reportButtonClass('top-selling')} disabled={loading} onClick={() => runReport('top-selling')}>
               Top Selling Items
             </button>
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('low-stock')}>
+            <button type="button" className={reportButtonClass('low-stock')} disabled={loading} onClick={() => runReport('low-stock')}>
               Low Stock
             </button>
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('revenue')}>
+            <button type="button" className={reportButtonClass('revenue')} disabled={loading} onClick={() => runReport('revenue')}>
               Revenue
             </button>
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('employee')}>
+            <button type="button" className={reportButtonClass('employee')} disabled={loading} onClick={() => runReport('employee')}>
               Employee Summary
             </button>
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('usage')}>
+            <button type="button" className={reportButtonClass('usage')} disabled={loading} onClick={() => runReport('usage')}>
               Product Usage
             </button>
-            <button type="button" className="action-btn" disabled={loading} onClick={() => runReport('x-report')}>
+            <button type="button" className={reportButtonClass('x-report')} disabled={loading} onClick={() => runReport('x-report')}>
               X-Report
             </button>
-            <button type="button" className="action-btn delete" disabled={loading} onClick={() => runReport('z-report')}>
+            <button type="button" className={reportButtonClass('z-report', 'delete')} disabled={loading} onClick={() => runReport('z-report')}>
               Z-Report (close day)
             </button>
             <button type="button" className="action-btn add" onClick={() => setShowCustom((s) => !s)}>

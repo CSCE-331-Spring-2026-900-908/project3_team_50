@@ -1,3 +1,5 @@
 node_modules/
 .env
 dist/
+rules.md
+structure.txt
