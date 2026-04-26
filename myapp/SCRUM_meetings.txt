@@ -308,8 +308,7 @@ Tasks Completed:
 
 Before The Next Meeting
 Plans:
-    We need to collect all the project requirment and make sure we have everything we need for the final demonstration,
-    and add what we do not have. 
+    We need to collect all the project requirment and make sure we have everything we need for the final demonstration, and add what we do not have. 
     We need font size, and we need customer account with reorder fetures tested.
     We need the chatbot.
 
@@ -344,7 +343,7 @@ Meeting Agenda Items:
 Updates:
     Font size options added for accessibility
     Customer Account and reorder features were lost due to merge errors
-    chatbot not started yet
+    Chatbot not started yet
 
 Tasks Completed:
     Task Description: Add font size options for accessibility
@@ -381,9 +380,8 @@ Task Assignments:
 
 Minutes:
     We are in the final stretch. We need to make sure we have all the features we
-    want for the final demonstration. We need to make sure we have all the project
-    requirements met and we need to add any features we think are necessary. 
-    We have time, and life is busy, but we need to make progress
+    want for the final demonstration. We still need to make sure we have all the project
+    requirements met. We have time, and life is busy, but we need to make progress
 
 
 04/24/2026 Meeting 9
@@ -395,7 +393,7 @@ Meeting Agenda Items:
 
 Updates:
     Customer account are back up and running, but the point system math is wrong and reorder does not include the customization options yet.
-    Chatbot is still not started, but we have a plan for it and we know what we want to do with it.
+    Chatbot is started, but we have a plan for it and we know what we want to do with it.
 
 Tasks Completed:
     Task Description: ReAdd customer accounts, implement reorder feture (Fix what was lost in merge).
@@ -404,11 +402,11 @@ Tasks Completed:
 
     Task Description: Set up and integrate chatbot
     Assigned to: Gavin  
-    Completed? (yes/no): Yes
+    Completed? (yes/no): No
 
     Task Description: Add weather API to more pages
     Assigned to: Gavin
-    Completed? (yes/no): No
+    Completed? (yes/no): Yes
 
 Before The Next Meeting
 Plans:
@@ -430,5 +428,5 @@ Task Assignments:
 Minutes:
     Customer accounts are still not fully functional due to challenges with lost code and backend issues. 
     Chatbot needs to fully finished and merged in. Test and prep for final demonstration. 
-    
+
 
