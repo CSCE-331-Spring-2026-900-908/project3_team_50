@@ -277,3 +277,158 @@ Minutes:
     We are behind on our schedule and we need to get these features done.
     We have been busy, but we need to get these things done asap.
 
+04/15/2026 Meeting 7
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items:
+    Sprint 3 Planning
+    Task Distribution for Sprint 3
+
+Updates:
+    Weather API is working and integrated into the manager page.
+    Images are added to menu items and working on the kiosk dashboard
+    Manager reports updated and revamped with visauls
+    Google Auth is integrated
+
+Tasks Completed:
+    Task Description: Add images to menu items
+    Assigned to: Britton
+    Completed? (yes/no): Yes
+
+    Task Description: Start Machine Translation for Accessibility Features
+    Assigned to: Michael
+    Completed? (yes/no): Yes
+
+    Task Description: Add point system and point payment to customer Accounts  
+    Assigned to: Mason
+    Completed? (yes/no): Yes
+
+    Task Description: Finish Weather API
+    Assigned to: Gavin
+    Completed? (yes/no): Yes
+
+Before The Next Meeting
+Plans:
+    We need to collect all the project requirment and make sure we have everything we need for the final demonstration,
+    and add what we do not have. 
+    We need font size, and we need customer account with reorder fetures tested.
+    We need the chatbot.
+
+Task Assignments:
+    Task Description: Add font size options for accessibility
+    Assigned to: Michael
+    
+    Task Description: Add reorder features to customer accounts
+    Assigned to: Mason
+    
+    Task Description: Set up and integrate chatbot
+    Assigned to: Gavin
+
+    Task Description: Testing, Backend check, and Final Touches
+    Assigned to: Britton
+
+Minutes:
+    We are in the final stretch. We need to make sure we have all the features we
+    want for the final demonstration. We need to make sure we have all the project 
+    requirements met and we need to add any features we think are necessary. 
+    We need to make sure we have a good demo and we need to make sure we have 
+    a good presentation. We need to make sure we have everything ready for the final demonstration.
+    
+
+04/20/2026 Meeting 8
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items:
+    Whats left to do for the final demonstration
+    Where are we stuck.
+    What is everyone schedule
+
+Updates:
+    Font size options added for accessibility
+    Customer Account and reorder features were lost due to merge errors
+    chatbot not started yet
+
+Tasks Completed:
+    Task Description: Add font size options for accessibility
+    Assigned to: Michael
+    Completed? (yes/no): Yes
+
+    Task Description: Add reorder features to customer accounts
+    Assigned to: Mason
+    Completed? (yes/no): No
+
+    Task Description: Set up and integrate chatbot
+    Assigned to: Gavin
+    Completed? (yes/no): No
+
+Before The Next Meeting
+Plans:
+    We need to get the reorder features back on track and working for the final demonstration.
+    We need to get the chatbot set up and working for the final demonstration.
+    We need to start working on the presentation and the demo for the final demonstration.
+    We need the weather API in more places than just the manager. 
+
+Task Assignments:
+    Task Description: ReAdd customer accounts, implement reorder feture (Fix what was lost in merge).
+    Assigned to: Mason
+
+    Task Description: Set up and integrate chatbot
+    Assigned to: Gavin
+
+    Task Description: Add weather API to more pages
+    Assigned to: Gavin
+
+    Task Description: Testing, Finding bugs
+    Assigned to: Britton and Michael 
+
+Minutes:
+    We are in the final stretch. We need to make sure we have all the features we
+    want for the final demonstration. We need to make sure we have all the project
+    requirements met and we need to add any features we think are necessary. 
+    We have time, and life is busy, but we need to make progress
+
+
+04/24/2026 Meeting 9
+Meeting Attendees: Gavin Bono, Britton McLean, Mason Mote, Michael Rao
+Meeting Agenda Items:
+    Whats left?
+    Any changes we want to make
+    Are we going to make it
+
+Updates:
+    Customer account are back up and running, but the point system math is wrong and reorder does not include the customization options yet.
+    Chatbot is still not started, but we have a plan for it and we know what we want to do with it.
+
+Tasks Completed:
+    Task Description: ReAdd customer accounts, implement reorder feture (Fix what was lost in merge).
+    Assigned to: Mason
+    Completed? (yes/no): No
+
+    Task Description: Set up and integrate chatbot
+    Assigned to: Gavin  
+    Completed? (yes/no): Yes
+
+    Task Description: Add weather API to more pages
+    Assigned to: Gavin
+    Completed? (yes/no): No
+
+Before The Next Meeting
+Plans:
+    We need Customer accounts with reorder and points tracking fully integrated and tested. 
+    We need to have the chatbot fully integrated and working for the final demonstration.
+    We need to have the weather API in more places than just the manager.
+    We need to check that all of our fetures funtion as expected. No last minute surprises.
+
+Task Assignments:
+    Task Description: Finish integrating and testing customer accounts with reorder and points tracking.
+    Assigned to: Mason
+    
+    Task Description: Add weather API to more pages
+    Assigned to: Gavin
+
+    Task Description: Testing, Finding bugs, Final Touches
+    Assigned to: Britton and Michael
+
+Minutes:
+    Customer accounts are still not fully functional due to challenges with lost code and backend issues. 
+    Chatbot needs to fully finished and merged in. Test and prep for final demonstration. 
+    
+
