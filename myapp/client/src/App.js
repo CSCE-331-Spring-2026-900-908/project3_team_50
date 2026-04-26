@@ -15,10 +15,13 @@ import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [kioskCustomer, setKioskCustomer] = useState(null);
+  const [isKioskLoginOpen, setIsKioskLoginOpen] = useState(true);
   const { language, setLanguage, supportedLanguages, isTranslating } = useGoogleTranslate();
 
   const handleLogout = () => {
     setUser(null);
+    setKioskCustomer(null);
     localStorage.removeItem('user');
   };
 
@@ -57,7 +60,28 @@ function App() {
                 </div>
 
                 <div className="nav-welcome">
-                  <span>Welcome Valued Customer</span>
+                  {!isKioskLoginOpen && (
+                    <>
+                      <span>
+                        {kioskCustomer ? `Welcome, ${kioskCustomer.cus_fname}` : 'Welcome, Guest'}
+                      </span>
+                      <button
+                        className="logout-customer-btn"
+                        onClick={() => window.dispatchEvent(new Event('kiosk-logout'))}
+                        title="Start new order with different customer"
+                        aria-label="Switch customer"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M14 19a6 6 0 0 0-12 0" />
+                          <circle cx="8" cy="7" r="4" />
+                          <polyline points="16 11 14 13 16 15" />
+                          <line x1="14" y1="13" x2="22" y2="13" />
+                          <polyline points="20 17 22 19 20 21" />
+                          <line x1="16" y1="19" x2="22" y2="19" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div className="nav-user">
@@ -73,7 +97,7 @@ function App() {
 
               <main className="main-content">
                 <Routes>
-                  <Route path="/kiosk" element={<Kiosk />} />
+                  <Route path="/kiosk" element={<Kiosk onCustomerChange={setKioskCustomer} onLoginStateChange={setIsKioskLoginOpen} />} />
                   <Route path="/" element={<Navigate to="/kiosk" replace />} />
                   <Route path="*" element={<Navigate to="/kiosk" replace />} />
                 </Routes>

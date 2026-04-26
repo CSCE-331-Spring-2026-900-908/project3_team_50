@@ -4,23 +4,25 @@
 .app-shell {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100svh;
+  min-height: 0;
+  overflow: hidden;
 }
 
 /* ── Top Navigation ────────────────────────────────────────────────── */
 .top-nav {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  flex-wrap: wrap;
-  justify-content: space-between;
   gap: 10px 16px;
-  padding: 10px 24px;
-  min-height: 64px;
+  padding: clamp(8px, 1.2vw, 12px) clamp(14px, 2vw, 24px);
+  min-height: clamp(56px, 8vh, 66px);
   background: var(--clr-indigo);
   /* Deep Indigo per request */
   box-shadow: 0 4px 12px rgba(45, 19, 80, 0.2);
   position: sticky;
   top: 0;
+  flex: 0 0 auto;
   z-index: 100;
   color: #ffffff;
   /* Ensure contrast on Indigo */
@@ -30,15 +32,15 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-shrink: 0;
+  justify-self: start;
 }
 
 .brand-icon {
-  font-size: 1.6rem;
+  font-size: clamp(1.25rem, 2.2vw, 1.6rem);
 }
 
 .brand-text {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
   font-weight: 800;
   letter-spacing: -.03em;
   color: #ffffff;
@@ -49,6 +51,7 @@
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
+  justify-self: center;
 }
 
 .nav-pill {
@@ -86,10 +89,9 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: clamp(6px, 1vw, 12px);
+  justify-self: end;
   justify-content: flex-end;
-  margin-left: auto;
-  max-width: 100%;
 }
 
 .language-select-wrap {
@@ -265,6 +267,12 @@ body {
   color: rgba(255, 255, 255, 0.8);
 }
 
+@media (max-width: 1180px) {
+  .user-info {
+    display: none;
+  }
+}
+
 .user-badge {
   padding: 6px 14px;
   border-radius: 999px;
@@ -296,12 +304,14 @@ body {
 
 /* Nav Welcome (Customer Kiosk)*/
 .nav-welcome {
-  flex: 1 1 240px;
-  min-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  justify-self: center;
   font-size: 1rem;
   font-weight: 600;
   color: #ffffff;
-  text-align: center;
   padding: 0 8px;
 }
 
@@ -478,7 +488,15 @@ body {
 
 /* ── Main Content ──────────────────────────────────────────────────── */
 .main-content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  padding: clamp(10px, 1.5vw, 22px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content > * {
+  min-height: 0;
 }
