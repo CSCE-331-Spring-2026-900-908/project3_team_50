@@ -213,6 +213,7 @@ export default function Kiosk() {
         subtotal: subtotal,
         tip,
         points_redeemed: pointsToRedeem,
+        payment_method: 'Card',
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,

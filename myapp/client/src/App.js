@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate } from 'react-router-dom';
-import axios from 'axios';
 import CashierDashboard from './components/CashierDashboard';
 import MenuManagement from './components/MenuManagement';
 import InventoryManagement from './components/InventoryManagement';
@@ -13,8 +12,6 @@ import LanguageSwitcher from './i18n/LanguageSwitcher';
 import useGoogleTranslate from './i18n/Translate';
 import FontSizePicker from './components/FontSizePicker';
 import './App.css';
-
-const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
 function App() {
   const [user, setUser] = useState(null);

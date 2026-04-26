@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const SALES_TAX_RATE = 0.0825;
+
 // ═══════════════════════════════════════════════════════════════════════
 //  Mapping functions for customization levels
 // ═══════════════════════════════════════════════════════════════════════
@@ -60,7 +62,19 @@ const sweetNumToText = {
 // ═══════════════════════════════════════════════════════════════════════
 router.post('/', async (req, res) => {
   const pool = req.app.locals.pool;
-  const { cashier_name, customer_name, customer_id, total, subtotal, tip, points_used, points_redeemed, discount_applied, items } = req.body;
+  const {
+    cashier_name,
+    customer_name,
+    customer_id,
+    total,
+    subtotal,
+    tip,
+    points_used,
+    points_redeemed,
+    discount_applied,
+    payment_method,
+    items,
+  } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ error: 'No items in order' });
@@ -81,11 +95,38 @@ router.post('/', async (req, res) => {
       empId = empResult.rows[0].employee_id;
     }
 
-    // 2. Insert Order
-    const finalTotal = (total || 0) + (tip || 0);
+    // 2. Ensure schema supports tracking sales type + tax
+    await client.query(
+      `ALTER TABLE orders
+       ADD COLUMN IF NOT EXISTS tax NUMERIC DEFAULT 0`
+    );
+    await client.query(
+      `ALTER TABLE orders
+       ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'Unknown'`
+    );
+
+    // Compute tax on taxable subtotal (after point discount, before tip)
+    const parsedSubtotal = Number(subtotal) || 0;
+    const parsedTip = Number(tip) || 0;
+    const parsedTotal = Number(total) || 0; // source of truth from client checkout UI
+    const pointsRedeemedDollars = (Number(points_redeemed || points_used || 0) || 0) / 10;
+    const taxableBase = Math.max(0, parsedSubtotal - pointsRedeemedDollars);
+    const calculatedTax = Number((taxableBase * SALES_TAX_RATE).toFixed(2));
+
+    // Normalize payment method while keeping compatibility with existing clients.
+    let normalizedPaymentMethod = 'Unknown';
+    if (typeof payment_method === 'string' && payment_method.trim()) {
+      normalizedPaymentMethod = payment_method.trim();
+    } else if (parsedTip > 0) {
+      normalizedPaymentMethod = 'Card';
+    }
+
+    // 3. Insert Order with payment method and tax tracking
     const orderResult = await client.query(
-      'INSERT INTO Orders (Cus_name, Employee_ID, TimeStamp, Total) VALUES ($1, $2, CURRENT_TIMESTAMP, $3) RETURNING Order_ID',
-      [customer_name || 'Walk-in', empId, finalTotal]
+      `INSERT INTO Orders (Cus_name, Employee_ID, TimeStamp, Total, tax, payment_method)
+       VALUES ($1, $2, CURRENT_TIMESTAMP, $3, $4, $5)
+       RETURNING Order_ID`,
+      [customer_name || 'Walk-in', empId, parsedTotal, calculatedTax, normalizedPaymentMethod]
     );
     const newOrderId = orderResult.rows[0].order_id;
 

@@ -132,6 +132,7 @@ export default function CashierDashboard() {
         subtotal: subtotal,
         tip: paymentType === 'CARD' ? tip : 0,
         points_redeemed: pointsToRedeem,
+        payment_method: paymentType === 'CASH' ? 'Cash' : paymentType === 'CARD' ? 'Card' : 'Unknown',
         items: orderItems.map((item) => ({
           baseItemId: item.baseItemId,
           bobaInventoryId: item.bobaInventoryId,
@@ -453,21 +454,6 @@ function CheckoutPanel({
   const maxPointsByDiscount = Math.ceil(subtotal) * 10;
   const effectiveMaxPoints = Math.min(maxPointsToRedeem, maxPointsByDiscount);
 
-  const handlePointsChange = (newValue) => {
-    const numValue = parseInt(newValue) || 0;
-    // Ensure points are in increments of 10 and don't exceed max
-    const cappedValue = Math.min(Math.max(0, Math.round(numValue / 10) * 10), effectiveMaxPoints);
-    setPointsToRedeem(cappedValue);
-  };
-
-  const incrementPoints = () => {
-    handlePointsChange(pointsToRedeem + 10);
-  };
-
-  const decrementPoints = () => {
-    handlePointsChange(pointsToRedeem - 10);
-  };
-
   const handleApplyPoints = () => {
     const points = parseInt(pointsInput, 10);
     if (isNaN(points) || points < 0) {
@@ -482,7 +468,8 @@ function CheckoutPanel({
       alert('Can only redeem in increments of 10 points');
       return;
     }
-    setPointsToRedeem(points);
+    const sanitizedPoints = Math.min(Math.max(0, points), effectiveMaxPoints);
+    setPointsToRedeem(sanitizedPoints);
     setShowPointsInput(false);
     setPointsInput('');
   };
