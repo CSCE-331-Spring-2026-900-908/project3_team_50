@@ -533,7 +533,7 @@
 
 .reorder-btn {
   padding: 8px 12px;
-  background: linear-gradient(135deg, var(--clr-primary) 0%, var(--clr-accent) 100%);
+  background: rgb(124, 58, 237);
   color: #fff;
   border: none;
   border-radius: var(--radius-kmd);
