@@ -2,6 +2,37 @@ const express = require('express');
 const router = express.Router();
 
 // ═══════════════════════════════════════════════════════════════════════
+//  Mapping functions for customization levels
+// ═══════════════════════════════════════════════════════════════════════
+// Ice level: 0=No Ice, 1=Less Ice, 2=Regular Ice, 3=More Ice
+const iceTextToNum = {
+  'No Ice': 0,
+  'Less Ice': 1,
+  'Regular Ice': 2,
+  'More Ice': 3,
+};
+
+const iceNumToText = {
+  0: 'No Ice',
+  1: 'Less Ice',
+  2: 'Regular Ice',
+  3: 'More Ice',
+};
+
+// Sweet level: 1=Less Sweet, 2=Regular Sweet, 3=More Sweet
+const sweetTextToNum = {
+  'Less Sweet': 1,
+  'Regular Sweet': 2,
+  'More Sweet': 3,
+};
+
+const sweetNumToText = {
+  1: 'Less Sweet',
+  2: 'Regular Sweet',
+  3: 'More Sweet',
+};
+
+// ═══════════════════════════════════════════════════════════════════════
 //  POST /api/orders
 //  → Process a complete checkout transaction
 //  Mirrors CashierDashboard.processCheckout()
@@ -20,6 +51,8 @@ const router = express.Router();
 //      {
 //        baseItemId: 3,
 //        bobaInventoryId: 12,  // -1 means no boba
+//        ice: "Regular Ice",
+//        sweetness: "Regular Sweet"
 //      },
 //      ...
 //    ]
@@ -27,7 +60,7 @@ const router = express.Router();
 // ═══════════════════════════════════════════════════════════════════════
 router.post('/', async (req, res) => {
   const pool = req.app.locals.pool;
-  const { cashier_name, customer_name, customer_id, total, subtotal, tip, points_used, discount_applied, items } = req.body;
+  const { cashier_name, customer_name, customer_id, total, subtotal, tip, points_used, points_redeemed, discount_applied, items } = req.body;
 
   if (!items || items.length === 0) {
     return res.status(400).json({ error: 'No items in order' });
@@ -58,10 +91,14 @@ router.post('/', async (req, res) => {
 
     // 3. Process each item — insert order details & deduct inventory
     for (const item of items) {
-      // Insert Order Detail
+      // Convert customization text values to numeric values
+      const toppingId = item.bobaInventoryId && item.bobaInventoryId !== -1 ? item.bobaInventoryId : null;
+      const iceLevel = iceTextToNum[item.ice || 'Regular Ice'] ?? 2; // Default to 2 (Regular Ice)
+      const sweetLevel = sweetTextToNum[item.sweetness || 'Regular Sweet'] ?? 2; // Default to 2 (Regular Sweet)
+      
       await client.query(
-        'INSERT INTO Order_Details (Order_ID, Item_ID, Quantity) VALUES ($1, $2, 1)',
-        [newOrderId, item.baseItemId]
+        'INSERT INTO Order_Details (Order_ID, Item_ID, Quantity, topping_id, ice_level, sweet_level) VALUES ($1, $2, 1, $3, $4, $5)',
+        [newOrderId, item.baseItemId, toppingId, iceLevel, sweetLevel]
       );
 
       // Fetch base recipe ingredients from junction table & deduct
@@ -88,9 +125,10 @@ router.post('/', async (req, res) => {
     // 4. Handle customer loyalty points (if customer_id provided)
     if (customer_id) {
       const baseSubtotal = subtotal || total;
+      const ptsRedeemed = points_redeemed || points_used || 0;
+      // Earn 1 point per dollar of subtotal (after applying any discounts from redemption)
       const earnedPoints = discount_applied ? 0 : Math.floor(baseSubtotal);
-      const pointsUsed = points_used || 0;
-      const newPoints = Math.max(0, earnedPoints - pointsUsed);
+      const newPoints = Math.max(0, earnedPoints - ptsRedeemed);
 
       // Get current customer info
       const customerRes = await client.query(
@@ -100,7 +138,7 @@ router.post('/', async (req, res) => {
 
       if (customerRes.rows.length > 0) {
         const customer = customerRes.rows[0];
-        const currentPoints = (customer.points || 0) + newPoints;
+        const currentPoints = (parseInt(customer.points, 10) || 0) + newPoints;
         const currentPastOrders = customer.past_orders || '';
         
         // Add new order to past_orders list (max 3)
@@ -129,7 +167,7 @@ router.post('/', async (req, res) => {
 
 // ═══════════════════════════════════════════════════════════════════════
 //  GET /api/orders/:orderId
-//  → Retrieve order details for reorder functionality
+//  → Retrieve order details for reorder functionality with all customizations
 // ═══════════════════════════════════════════════════════════════════════
 router.get('/:orderId', async (req, res) => {
   const pool = req.app.locals.pool;
@@ -146,25 +184,36 @@ router.get('/:orderId', async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Get order items with details
+    // Get order items with details and customizations
     const itemsRes = await pool.query(
-      `SELECT od.Item_ID, mi.item_name, mi.price
-       FROM Order_Details od
-       JOIN menu_items mi ON od.Item_ID = mi.item_id
-       WHERE od.Order_ID = $1`,
+      `SELECT od.item_id, od.topping_id, od.ice_level, od.sweet_level, mi.item_name, mi.price, mi.icon_config, inv.name as topping_name
+       FROM order_details od
+       JOIN menu_items mi ON od.item_id = mi.item_id
+       LEFT JOIN inventory inv ON od.topping_id = inv.inventory_id
+       WHERE od.order_id = $1`,
       [orderId]
     );
 
-    const items = itemsRes.rows.map((row) => ({
-      baseItemId: row.item_id,
-      name: row.item_name,
-      basePrice: parseFloat(row.price),
-      bobaInventoryId: -1,
-      boba: 'No Boba',
-      bobaPrice: 0,
-      ice: 'Regular Ice',
-      sweetness: 'Regular Sweet',
-    }));
+    const items = itemsRes.rows.map((row) => {
+      // Convert numeric values back to text and construct response object
+      const bobaInventoryId = row.topping_id || -1;
+      const bobaPrice = bobaInventoryId && bobaInventoryId !== -1 ? 0.5 : 0;
+      const ice = iceNumToText[row.ice_level] || 'Regular Ice';
+      const sweetness = sweetNumToText[row.sweet_level] || 'Regular Sweet';
+      const bobaName = row.topping_name || 'No Boba';
+
+      return {
+        baseItemId: row.item_id,
+        name: row.item_name,
+        basePrice: parseFloat(row.price),
+        iconConfig: row.icon_config,
+        bobaInventoryId,
+        boba: bobaInventoryId && bobaInventoryId !== -1 ? bobaName : 'No Boba',
+        bobaPrice,
+        ice,
+        sweetness,
+      };
+    });
 
     res.json({
       order_id: orderRes.rows[0].order_id,

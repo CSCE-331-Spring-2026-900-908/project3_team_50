@@ -708,3 +708,463 @@
   border-color: var(--clr-primary);
   color: var(--text-primary);
 }
+
+/* ── Customer Lookup Section ───────────────────────────────────────── */
+.customer-lookup-section {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.customer-lookup-section h3 {
+  margin: 0;
+  font-weight: 600;
+}
+
+.lookup-subtitle {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--text-secondary);
+}
+
+.lookup-method-tabs {
+  display: flex;
+  gap: 10px;
+}
+
+.method-tab {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: .85rem;
+  transition: all .2s;
+  cursor: pointer;
+}
+
+.method-tab:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--clr-primary);
+}
+
+.method-tab.active {
+  background: var(--clr-primary);
+  border-color: var(--clr-primary-light);
+  color: #fff;
+}
+
+.lookup-input-group {
+  display: flex;
+  gap: 10px;
+}
+
+.lookup-input-group input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: .95rem;
+  font-family: inherit;
+}
+
+.lookup-input-group input:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+.lookup-btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-primary);
+  background: transparent;
+  color: var(--clr-primary-light);
+  font-weight: 600;
+  font-size: .85rem;
+  transition: all .2s;
+  white-space: nowrap;
+}
+
+.lookup-btn:hover:not(:disabled) {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.lookup-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.lookup-error {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.3);
+  color: #ef4444;
+  font-size: .85rem;
+  margin: 0;
+}
+
+.skip-lookup-btn {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: .85rem;
+  transition: all .2s;
+}
+
+.skip-lookup-btn:hover {
+  background: var(--bg-glass);
+  color: var(--text-primary);
+}
+
+/* ── Customer Info Section ─────────────────────────────────────────── */
+.customer-info-section {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.customer-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.customer-info-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.customer-points {
+  margin: 8px 0 0;
+  font-size: .9rem;
+  color: var(--clr-accent);
+  font-weight: 600;
+}
+
+.change-customer-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: .8rem;
+  white-space: nowrap;
+  transition: all .2s;
+}
+
+.change-customer-btn:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--clr-primary);
+  color: var(--clr-primary);
+}
+
+/* ── Points Redemption ─────────────────────────────────────────────── */
+.points-section {
+  background: rgba(124,58,237,.05);
+  border: 1px solid rgba(124,58,237,.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.points-header h3 {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+.available-points {
+  font-size: .8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.use-points-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(124,58,237,.3);
+  background: transparent;
+  color: var(--clr-primary);
+  font-weight: 600;
+  font-size: .9rem;
+  transition: all .2s;
+  cursor: pointer;
+}
+
+.use-points-btn:hover {
+  background: rgba(124,58,237,.1);
+  border-color: rgba(124,58,237,.5);
+}
+
+.points-redeemed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.points-redeemed-text {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--text-primary);
+}
+
+.clear-points {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: .8rem;
+  transition: all .2s;
+}
+
+.clear-points:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--clr-primary);
+  color: var(--text-primary);
+}
+
+.points-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.points-ratio {
+  margin: 0;
+  font-size: .75rem;
+  color: var(--text-secondary);
+}
+
+.points-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.points-controls input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: .85rem;
+  font-family: inherit;
+}
+
+.points-controls input:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+.points-apply {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-primary);
+  background: transparent;
+  color: var(--clr-primary);
+  font-weight: 600;
+  font-size: .8rem;
+  transition: all .2s;
+}
+
+.points-apply:hover {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.points-cancel {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: .8rem;
+  transition: all .2s;
+}
+
+.points-cancel:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.points-redemption-section {
+  background: rgba(124,58,237,.05);
+  border: 1px solid rgba(124,58,237,.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.points-redemption-section h4 {
+  margin: 0 0 8px;
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.points-info {
+  margin: 0 0 12px;
+  font-size: .8rem;
+  color: var(--text-secondary);
+}
+
+.points-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: .85rem;
+}
+
+.points-label {
+  color: var(--text-secondary);
+}
+
+.points-value {
+  font-weight: 600;
+  color: var(--clr-accent);
+}
+
+/* ── Summary Row Discount ──────────────────────────────────────────── */
+.summary-row.discount-row {
+  color: var(--clr-accent);
+  font-weight: 600;
+}
+
+.summary-row.discount-row span:last-child {
+  color: var(--clr-accent);
+}
+
+/* ── Create Account Form ───────────────────────────────────────────── */
+.create-account-subtitle {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: .9rem;
+}
+
+.create-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-col label,
+.form-group label {
+  font-size: .8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.form-col input,
+.form-group input {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: .9rem;
+  font-family: inherit;
+}
+
+.form-col input:focus,
+.form-group input:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-error {
+  padding: 12px;
+  border-radius: var(--radius-md);
+  background: rgba(239,68,68,.1);
+  border: 1px solid rgba(239,68,68,.3);
+  color: #ef4444;
+  font-size: .85rem;
+  margin: 0;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.skip-account-btn,
+.create-account-btn {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: .9rem;
+  transition: all .2s;
+}
+
+.skip-account-btn:hover:not(:disabled) {
+  background: var(--bg-glass-hover);
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.create-account-btn {
+  background: var(--clr-primary);
+  border-color: var(--clr-primary-light);
+  color: #fff;
+}
+
+.create-account-btn:hover:not(:disabled) {
+  background: var(--clr-primary-light);
+  box-shadow: var(--shadow-glow);
+}
+
+.create-account-btn:disabled,
+.skip-account-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
