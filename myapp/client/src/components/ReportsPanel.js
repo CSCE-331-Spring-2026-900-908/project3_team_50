@@ -58,13 +58,53 @@ function formatReportText(title, data) {
       return `${title}\n(No rows)\n`;
     }
     const keys = Object.keys(data.rows[0]);
-    out += keys.join('\t') + '\n';
-    out += '-'.repeat(60) + '\n';
-    data.rows.forEach((row) => {
-      out += keys.map((k) => String(row[k] ?? '')).join('\t') + '\n';
-    });
+    out += formatTable(keys, data.rows);
   }
   return out;
+}
+
+function formatTable(columns, rows) {
+  if (!rows || rows.length === 0) return '(No rows)\n';
+  
+  const formatCell = (val) => {
+    if (val == null) return '';
+    if (typeof val === 'number') {
+      return Number.isInteger(val) ? String(val) : val.toFixed(2);
+    }
+    if (typeof val === 'string' && !isNaN(val) && val.includes('.')) {
+      const num = Number(val);
+      if (!isNaN(num)) return num.toFixed(2);
+    }
+    return String(val);
+  };
+
+  const formattedRows = rows.map(row => {
+    const newRow = {};
+    columns.forEach(k => newRow[k] = formatCell(row[k]));
+    return newRow;
+  });
+
+  const colWidths = {};
+  columns.forEach(k => {
+    let maxLen = k.length;
+    formattedRows.forEach(row => {
+      if (row[k].length > maxLen) maxLen = row[k].length;
+    });
+    colWidths[k] = Math.min(maxLen + 3, 40); // 3 spaces padding, max 40 chars
+  });
+
+  let text = columns.map(k => k.padEnd(colWidths[k])).join('') + '\n';
+  text += '-'.repeat(Object.values(colWidths).reduce((a, b) => a + b, 0)) + '\n';
+  formattedRows.forEach((row) => {
+    text += columns.map((k) => {
+       let val = row[k];
+       if (val.length > colWidths[k] - 1) {
+           val = val.substring(0, colWidths[k] - 4) + '...';
+       }
+       return val.padEnd(colWidths[k]);
+    }).join('') + '\n';
+  });
+  return text;
 }
 
 function BarChart({ rows, labelKey, valueKey, labelFormat }) {
@@ -221,11 +261,7 @@ export default function ReportsPanel() {
       const res = await axios.get(`${API}/reports/custom-queries/${id}/run`);
       const { columns, rows } = res.data;
       setReportTitle('Custom Query');
-      let text = columns.join('\t') + '\n';
-      rows.forEach((row) => {
-        text += columns.map((c) => String(row[c] ?? '')).join('\t') + '\n';
-      });
-      setReportText(text);
+      setReportText(formatTable(columns, rows));
       setChartData(null);
     } catch (err) {
       setError(err.response?.data?.error || err.message);
@@ -287,7 +323,60 @@ export default function ReportsPanel() {
         <span className="reports-filter-hint">Used for date-ranged reports (not X/Z / low stock).</span>
       </div>
 
-      <div className="reports-layout">
+      <div className="reports-buttons reports-toolbar glass-card">
+        <button type="button" className={reportButtonClass('sales-category')} disabled={loading} onClick={() => runReport('sales-category')} title="Sales by Category">
+          Sales Category
+        </button>
+        <button type="button" className={reportButtonClass('top-selling')} disabled={loading} onClick={() => runReport('top-selling')} title="Top Selling Items">
+          Top Items
+        </button>
+        <button type="button" className={reportButtonClass('low-stock')} disabled={loading} onClick={() => runReport('low-stock')}>
+          Low Stock
+        </button>
+        <button type="button" className={reportButtonClass('revenue')} disabled={loading} onClick={() => runReport('revenue')}>
+          Revenue
+        </button>
+        <button type="button" className={reportButtonClass('employee')} disabled={loading} onClick={() => runReport('employee')} title="Employee Summary">
+          Employee
+        </button>
+        <button type="button" className={reportButtonClass('usage')} disabled={loading} onClick={() => runReport('usage')} title="Product Usage">
+          Usage
+        </button>
+        <button type="button" className={reportButtonClass('x-report')} disabled={loading} onClick={() => runReport('x-report')}>
+          X-Report
+        </button>
+        <button type="button" className={reportButtonClass('z-report', 'delete')} disabled={loading} onClick={() => runReport('z-report')} title="Z-Report (close day)">
+          Z-Report
+        </button>
+        <button type="button" className="action-btn add" onClick={() => setShowCustom((s) => !s)} title="Custom Queries">
+          {showCustom ? 'Hide SQL' : 'Custom SQL'}
+        </button>
+      </div>
+
+      <div className={`reports-layout ${showCustom ? 'has-custom' : ''}`}>
+        <div className="reports-main">
+          <div className="reports-center glass-card">
+            <h2 className="reports-chart-title">{reportTitle}</h2>
+            {loading && <p className="reports-loading">Loading…</p>}
+            {chartData && (
+              <div className="reports-chart-wrap">
+                {chartData.type === 'bar' && (
+                  <BarChart
+                    rows={chartData.rows}
+                    labelKey={chartData.labelKey}
+                    valueKey={chartData.valueKey}
+                    labelFormat={chartData.labelFormat}
+                  />
+                )}
+                {chartData.type === 'pie' && (
+                  <PieLegend rows={chartData.rows} labelKey={chartData.labelKey} valueKey={chartData.valueKey} />
+                )}
+              </div>
+            )}
+            <pre className="reports-text-area">{reportText}</pre>
+          </div>
+        </div>
+
         {showCustom && (
           <aside className="reports-custom-sidebar glass-card">
             <h3>Custom Queries</h3>
@@ -327,57 +416,6 @@ export default function ReportsPanel() {
             </div>
           </aside>
         )}
-
-        <div className="reports-main">
-          <div className="reports-buttons">
-            <button type="button" className={reportButtonClass('sales-category')} disabled={loading} onClick={() => runReport('sales-category')}>
-              Sales by Category
-            </button>
-            <button type="button" className={reportButtonClass('top-selling')} disabled={loading} onClick={() => runReport('top-selling')}>
-              Top Selling Items
-            </button>
-            <button type="button" className={reportButtonClass('low-stock')} disabled={loading} onClick={() => runReport('low-stock')}>
-              Low Stock
-            </button>
-            <button type="button" className={reportButtonClass('revenue')} disabled={loading} onClick={() => runReport('revenue')}>
-              Revenue
-            </button>
-            <button type="button" className={reportButtonClass('employee')} disabled={loading} onClick={() => runReport('employee')}>
-              Employee Summary
-            </button>
-            <button type="button" className={reportButtonClass('usage')} disabled={loading} onClick={() => runReport('usage')}>
-              Product Usage
-            </button>
-            <button type="button" className={reportButtonClass('x-report')} disabled={loading} onClick={() => runReport('x-report')}>
-              X-Report
-            </button>
-            <button type="button" className={reportButtonClass('z-report', 'delete')} disabled={loading} onClick={() => runReport('z-report')}>
-              Z-Report (close day)
-            </button>
-            <button type="button" className="action-btn add" onClick={() => setShowCustom((s) => !s)}>
-              {showCustom ? 'Hide' : 'Show'} Custom Queries
-            </button>
-          </div>
-
-          <div className="reports-center glass-card">
-            <h2 className="reports-chart-title">{reportTitle}</h2>
-            {loading && <p className="reports-loading">Loading…</p>}
-            <div className="reports-chart-wrap">
-              {chartData && chartData.type === 'bar' && (
-                <BarChart
-                  rows={chartData.rows}
-                  labelKey={chartData.labelKey}
-                  valueKey={chartData.valueKey}
-                  labelFormat={chartData.labelFormat}
-                />
-              )}
-              {chartData && chartData.type === 'pie' && (
-                <PieLegend rows={chartData.rows} labelKey={chartData.labelKey} valueKey={chartData.valueKey} />
-              )}
-            </div>
-            <pre className="reports-text-area">{reportText}</pre>
-          </div>
-        </div>
       </div>
     </div>
   );

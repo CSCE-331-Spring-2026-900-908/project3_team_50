@@ -104,6 +104,10 @@ router.post('/', async (req, res) => {
       `ALTER TABLE orders
        ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'Unknown'`
     );
+    await client.query(
+      `ALTER TABLE menu_items_junction
+       ADD COLUMN IF NOT EXISTS quantity_used NUMERIC DEFAULT 1`
+    );
 
     // Compute tax on taxable subtotal (after point discount, before tip)
     const parsedSubtotal = Number(subtotal) || 0;
@@ -144,13 +148,13 @@ router.post('/', async (req, res) => {
 
       // Fetch base recipe ingredients from junction table & deduct
       const ingrResult = await client.query(
-        'SELECT ingredient_id FROM menu_items_junction WHERE menu_item_id = $1',
+        'SELECT ingredient_id, COALESCE(quantity_used, 1) AS quantity_used FROM menu_items_junction WHERE menu_item_id = $1',
         [item.baseItemId]
       );
       for (const row of ingrResult.rows) {
         await client.query(
-          'UPDATE inventory SET current_stock = current_stock - 1 WHERE inventory_id = $1',
-          [row.ingredient_id]
+          'UPDATE inventory SET current_stock = current_stock - $2 WHERE inventory_id = $1',
+          [row.ingredient_id, Number(row.quantity_used) || 1]
         );
       }
 

@@ -194,7 +194,17 @@ export default function Kiosk({
       iconConfig: item.icon_config || null,
       isDraft: true,
     };
-    setOrderItems((prev) => [newItem, ...prev]);
+    setOrderItems((prev) => {
+      const mapped = prev.map(i => {
+        if (i.isDraft) {
+          const copy = { ...i };
+          delete copy.isDraft;
+          return copy;
+        }
+        return i;
+      });
+      return [newItem, ...mapped];
+    });
     setCurrentItemIndex(0);
     setView('ADDONS');
   };
@@ -447,7 +457,10 @@ export default function Kiosk({
           )}
 
           <div className="order-items-list">
-            {orderItems.filter(item => !item.isDraft).length === 0 && (
+            {orderItems.filter((item, i) => {
+              const isEditing = view === 'ADDONS' && i === currentItemIndex;
+              return !item.isDraft || isEditing;
+            }).length === 0 && (
               <p className="empty-order">No items yet</p>
             )}
             {orderItems.map((item, i) => {
@@ -574,6 +587,15 @@ export default function Kiosk({
               className="checkout-btn"
               disabled={orderItems.length === 0}
               onClick={() => {
+                setOrderItems(prev => prev.map(item => {
+                  if (item.isDraft) {
+                    const copy = { ...item };
+                    delete copy.isDraft;
+                    return copy;
+                  }
+                  return item;
+                }));
+                setCurrentItemIndex(null);
                 setTip(0);
                 setView('CHECKOUT');
               }}
