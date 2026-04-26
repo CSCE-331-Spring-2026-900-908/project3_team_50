@@ -20,6 +20,9 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
   const [googleCredential, setGoogleCredential] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [weather, setWeather] = useState(null);
+  const [weatherLoading, setWeatherLoading] = useState(true);
+  const [weatherError, setWeatherError] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -39,6 +42,31 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchWeather = async () => {
+      try {
+        setWeatherError(false);
+        const response = await fetch(`${API}/weather?city=${encodeURIComponent('College Station')}`);
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch weather');
+        }
+        if (isMounted) setWeather(data);
+      } catch {
+        if (isMounted) setWeatherError(true);
+      } finally {
+        if (isMounted) setWeatherLoading(false);
+      }
+    };
+
+    fetchWeather();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleGoogleLogin = async (credentialResponse) => {
@@ -219,6 +247,17 @@ export default function Login({ onLogin, language, setLanguage, supportedLanguag
               Cancel and Return to Login
             </button>
           </div>
+        )}
+      </div>
+      <div className="login-weather-card" aria-label="Current weather">
+        {weatherLoading && <span>Loading weather...</span>}
+        {!weatherLoading && weatherError && <span>Weather unavailable</span>}
+        {!weatherLoading && !weatherError && weather && (
+          <>
+            <span className="login-weather-city">{weather.city}</span>
+            <span className="login-weather-temp">{Math.round(weather.temperature)}F</span>
+            <span className="login-weather-cond">{weather.condition}</span>
+          </>
         )}
       </div>
     </div>

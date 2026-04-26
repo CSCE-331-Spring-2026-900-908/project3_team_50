@@ -165,3 +165,39 @@
   cursor: not-allowed;
   transform: none;
 }
+
+.login-weather-card {
+  position: absolute;
+  left: 24px;
+  bottom: 24px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  box-shadow: var(--shadow-sm);
+}
+
+.login-weather-card span {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.login-weather-city {
+  font-weight: 700;
+  font-size: 1.06rem !important;
+  color: var(--text-primary) !important;
+}
+
+.login-weather-temp {
+  font-size: 1.28rem !important;
+  font-weight: 700;
+  color: var(--text-primary) !important;
+}
+
+.login-weather-cond {
+  text-transform: capitalize;
+}

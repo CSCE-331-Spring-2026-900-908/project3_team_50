@@ -1,0 +1,101 @@
+.weather-corner-widget {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 50;
+  min-width: 165px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  box-shadow: var(--shadow-sm);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weather-corner-line,
+.weather-corner-condition {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.weather-corner-city {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.weather-corner-temp {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.weather-corner-condition {
+  text-transform: capitalize;
+}
+.weather-corner-widget {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  min-width: 118px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(5px);
+  padding: 7px 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weather-corner-line {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.weather-corner-city {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.weather-corner-main {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.weather-corner-widget {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 60;
+  min-width: 118px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(5px);
+  padding: 7px 10px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.weather-corner-line {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.weather-corner-city {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.weather-corner-main {
+  font-weight: 600;
+  color: var(--text-primary);
+}
