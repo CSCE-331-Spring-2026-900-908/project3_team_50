@@ -314,7 +314,7 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
 
       {/* Boba */}
       <div className="addon-section">
-        <h3 className="addon-section-title">🧋 Boba Toppings — $0.50 each</h3>
+        <h3 className="addon-section-title"> Boba Toppings — $0.50 each</h3>
         
         {otherBoba.length > 0 && (
           <div style={{ marginBottom: '16px' }}>
@@ -366,7 +366,7 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
 
       {/* Ice */}
       <div className="addon-section">
-        <h3 className="addon-section-title">🧊 Ice Level</h3>
+        <h3 className="addon-section-title"> Ice Level</h3>
         <div className="addon-options">
           {iceOptions.map((opt) => (
             <button
@@ -382,7 +382,7 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
 
       {/* Sweetness */}
       <div className="addon-section">
-        <h3 className="addon-section-title">🍯 Sweetness</h3>
+        <h3 className="addon-section-title"> Sweetness</h3>
         <div className="addon-options">
           {sweetnessOptions.map((opt) => (
             <button
@@ -677,7 +677,7 @@ function CheckoutPanel({
                 setLookupInput('');
               }}
             >
-              📧 Email
+              Email
             </button>
             <button
               className={`method-tab ${lookupMethod === 'phone' ? 'active' : ''}`}
@@ -686,7 +686,7 @@ function CheckoutPanel({
                 setLookupInput('');
               }}
             >
-              📱 Phone
+              Phone
             </button>
           </div>
 

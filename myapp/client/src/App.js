@@ -100,7 +100,7 @@ function App() {
                         `nav-pill ${isActive ? 'active' : ''}`
                       }
                     >
-                      <span className="nav-icon">💳</span>
+                      
                       Cashier
                     </NavLink>
                   )}
@@ -113,7 +113,7 @@ function App() {
                         `nav-pill ${isActive ? 'active' : ''}`
                       }
                     >
-                      <span className="nav-icon">📋</span>
+                      
                       Manager Dashboard
                     </NavLink>
                   )}

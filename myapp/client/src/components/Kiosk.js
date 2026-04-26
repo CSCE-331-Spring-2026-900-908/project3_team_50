@@ -255,7 +255,7 @@ export default function Kiosk() {
         <div className="customer-info-center">
           {customer && (
             <span className="customer-points">
-              ⭐ {customer.points} points
+               {customer.points} points
             </span>
           )}
         </div>
@@ -512,7 +512,7 @@ export default function Kiosk() {
                 )}
                 {item.ice !== 'Regular Ice' && (
                   <div className="order-addon-row">
-                    <span>🧊 {item.ice}</span>
+                    <span> {item.ice}</span>
                     <button className="addon-remove-btn" onClick={() => {
                       const copy = [...orderItems];
                       copy[i] = { ...copy[i], ice: 'Regular Ice' };
@@ -522,7 +522,7 @@ export default function Kiosk() {
                 )}
                 {item.sweetness !== 'Regular Sweet' && (
                   <div className="order-addon-row">
-                    <span>🍯 {item.sweetness}</span>
+                    <span> {item.sweetness}</span>
                     <button className="addon-remove-btn" onClick={() => {
                       const copy = [...orderItems];
                       copy[i] = { ...copy[i], sweetness: 'Regular Sweet' };
@@ -573,7 +573,7 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
       {/* Toppings and sections follow */}
       {/* ── Boba Toppings ─────────────────────────────────────────── */}
       <section className="addon-section" aria-label="Boba toppings">
-        <h3 className="addon-section-title">🧋 Boba Toppings</h3>
+        <h3 className="addon-section-title"> Boba Toppings</h3>
 
         {/* Regular Boba subsection */}
         <p className="addon-sub-label">Classic Boba — <strong>+$0.50</strong></p>
@@ -620,7 +620,7 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
 
       {/* ── Ice Level ─────────────────────────────────────────────── */}
       <section className="addon-section" aria-label="Ice level">
-        <h3 className="addon-section-title">🧊 Ice Level</h3>
+        <h3 className="addon-section-title"> Ice Level</h3>
         <div className="addon-options">
           {iceOptions.map((opt) => (
             <button
@@ -636,7 +636,7 @@ function AddonsPanel({ item, bobaToppings, onSelectBoba, onUpdateItem, onDone })
 
       {/* ── Sweetness ─────────────────────────────────────────────── */}
       <section className="addon-section" aria-label="Sweetness level">
-        <h3 className="addon-section-title">🍯 Sweetness</h3>
+        <h3 className="addon-section-title"> Sweetness</h3>
         <div className="addon-options">
           {sweetnessOpts.map((opt) => (
             <button
