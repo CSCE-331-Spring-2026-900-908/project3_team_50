@@ -58,13 +58,53 @@ function formatReportText(title, data) {
       return `${title}\n(No rows)\n`;
     }
     const keys = Object.keys(data.rows[0]);
-    out += keys.join('\t') + '\n';
-    out += '-'.repeat(60) + '\n';
-    data.rows.forEach((row) => {
-      out += keys.map((k) => String(row[k] ?? '')).join('\t') + '\n';
-    });
+    out += formatTable(keys, data.rows);
   }
   return out;
+}
+
+function formatTable(columns, rows) {
+  if (!rows || rows.length === 0) return '(No rows)\n';
+  
+  const formatCell = (val) => {
+    if (val == null) return '';
+    if (typeof val === 'number') {
+      return Number.isInteger(val) ? String(val) : val.toFixed(2);
+    }
+    if (typeof val === 'string' && !isNaN(val) && val.includes('.')) {
+      const num = Number(val);
+      if (!isNaN(num)) return num.toFixed(2);
+    }
+    return String(val);
+  };
+
+  const formattedRows = rows.map(row => {
+    const newRow = {};
+    columns.forEach(k => newRow[k] = formatCell(row[k]));
+    return newRow;
+  });
+
+  const colWidths = {};
+  columns.forEach(k => {
+    let maxLen = k.length;
+    formattedRows.forEach(row => {
+      if (row[k].length > maxLen) maxLen = row[k].length;
+    });
+    colWidths[k] = Math.min(maxLen + 3, 40); // 3 spaces padding, max 40 chars
+  });
+
+  let text = columns.map(k => k.padEnd(colWidths[k])).join('') + '\n';
+  text += '-'.repeat(Object.values(colWidths).reduce((a, b) => a + b, 0)) + '\n';
+  formattedRows.forEach((row) => {
+    text += columns.map((k) => {
+       let val = row[k];
+       if (val.length > colWidths[k] - 1) {
+           val = val.substring(0, colWidths[k] - 4) + '...';
+       }
+       return val.padEnd(colWidths[k]);
+    }).join('') + '\n';
+  });
+  return text;
 }
 
 function BarChart({ rows, labelKey, valueKey, labelFormat }) {
@@ -221,11 +261,7 @@ export default function ReportsPanel() {
       const res = await axios.get(`${API}/reports/custom-queries/${id}/run`);
       const { columns, rows } = res.data;
       setReportTitle('Custom Query');
-      let text = columns.join('\t') + '\n';
-      rows.forEach((row) => {
-        text += columns.map((c) => String(row[c] ?? '')).join('\t') + '\n';
-      });
-      setReportText(text);
+      setReportText(formatTable(columns, rows));
       setChartData(null);
     } catch (err) {
       setError(err.response?.data?.error || err.message);
