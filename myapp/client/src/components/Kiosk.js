@@ -8,6 +8,7 @@ const defaultIconConfig = {
 };
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const TAX_RATE = 0.0825;
 
 /* ═══════════════════════════════════════════════════════════════════════
    Kiosk — Customer ordering view
@@ -47,6 +48,7 @@ export default function Kiosk() {
 
   const pointsDiscount = pointsToRedeem / 10; // 10 points = $1
   const totalAfterDiscount = Math.max(0, subtotal - pointsDiscount);
+  const taxAmount = Number((totalAfterDiscount * TAX_RATE).toFixed(2));
 
   // ── Data fetching ──────────────────────────────────────────────────
   useEffect(() => {
@@ -209,7 +211,7 @@ export default function Kiosk() {
         cashier_name: 'Walk-in',
         customer_id: customer?.cus_id || null,
         customer_name: customerName || customer?.cus_fname + ' ' + customer?.cus_lname || 'Walk-in',
-        total: totalAfterDiscount + tip,
+        total: totalAfterDiscount + taxAmount + tip,
         subtotal: subtotal,
         tip,
         points_redeemed: pointsToRedeem,
@@ -685,7 +687,8 @@ function CheckoutPanel({
 
   const availablePoints = customer?.points || 0;
   const pointsDiscount = pointsToRedeem / 10;
-  const total = totalAfterDiscount + tip;
+  const taxAmount = Number((totalAfterDiscount * TAX_RATE).toFixed(2));
+  const total = totalAfterDiscount + taxAmount + tip;
   const maxPointsByDiscount = Math.ceil(subtotal) * 10;
    const effectiveMaxPoints = Math.min(availablePoints, maxPointsByDiscount);
 
@@ -733,6 +736,10 @@ function CheckoutPanel({
             <span>-${pointsDiscount.toFixed(2)}</span>
           </div>
         )}
+        <div className="summary-row">
+          <span>Tax (8.25%)</span>
+          <span>${taxAmount.toFixed(2)}</span>
+        </div>
         
         <div className="summary-row">
           <span>Tip</span>

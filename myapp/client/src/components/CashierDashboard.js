@@ -3,6 +3,7 @@ import axios from 'axios';
 import './CashierDashboard.css';
 
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const TAX_RATE = 0.0825;
 
 /* ═══════════════════════════════════════════════════════════════════════
    Cashier Dashboard — POS view
@@ -47,6 +48,7 @@ export default function CashierDashboard() {
 
   const pointsDiscount = pointsToRedeem / 10; // 10 points = $1
   const totalAfterDiscount = Math.max(0, subtotal - pointsDiscount);
+  const taxAmount = Number((totalAfterDiscount * TAX_RATE).toFixed(2));
 
   // ── Data fetching ──────────────────────────────────────────────────
   useEffect(() => {
@@ -128,7 +130,7 @@ export default function CashierDashboard() {
         cashier_name: 'Walk-in',
         customer_name: customerName || customer?.cus_fname + ' ' + customer?.cus_lname || 'Walk-in',
         customer_id: customer?.cus_id || null,
-        total: totalAfterDiscount + (paymentType === 'CARD' ? tip : 0),
+        total: totalAfterDiscount + taxAmount + (paymentType === 'CARD' ? tip : 0),
         subtotal: subtotal,
         tip: paymentType === 'CARD' ? tip : 0,
         points_redeemed: pointsToRedeem,
@@ -446,8 +448,11 @@ function CheckoutPanel({
   ];
 
   const amountProvidedNum = parseFloat(amountProvided) || 0;
-  const change = amountProvidedNum - totalAfterDiscount;
-  const isValidCashPayment = amountProvidedNum >= totalAfterDiscount;
+  const taxAmount = Number((totalAfterDiscount * TAX_RATE).toFixed(2));
+  const cashTotalDue = totalAfterDiscount + taxAmount;
+  const finalTotal = cashTotalDue + (paymentType === 'CARD' ? tip : 0);
+  const change = amountProvidedNum - cashTotalDue;
+  const isValidCashPayment = amountProvidedNum >= cashTotalDue;
   const maxPointsToRedeem = customer ? customer.points : 0;
   
   // Cap points at nearest rounded-up dollar amount (10 points = $1)
@@ -805,9 +810,13 @@ function CheckoutPanel({
             <span>${tip.toFixed(2)}</span>
           </div>
         )}
+        <div className="summary-row">
+          <span>Tax (8.25%)</span>
+          <span>${taxAmount.toFixed(2)}</span>
+        </div>
         <div className="summary-row total-row">
           <span>Total</span>
-          <span>${(totalAfterDiscount + (paymentType === 'CARD' ? tip : 0)).toFixed(2)}</span>
+          <span>${finalTotal.toFixed(2)}</span>
         </div>
       </div>
 
@@ -909,7 +918,7 @@ function CheckoutPanel({
             <div className="cash-total">
               <div className="cash-total-row">
                 <span>Amount Due</span>
-                <span>${totalAfterDiscount.toFixed(2)}</span>
+                <span>${cashTotalDue.toFixed(2)}</span>
               </div>
               <div className="cash-total-row">
                 <span>Amount Provided</span>
@@ -955,8 +964,8 @@ function CheckoutPanel({
               {isProcessing
                 ? 'Processing…'
                 : paymentType === 'CASH'
-                ? `Confirm Cash Payment $${totalAfterDiscount.toFixed(2)}`
-                : `Pay $${(totalAfterDiscount + tip).toFixed(2)}`}
+                ? `Confirm Cash Payment $${cashTotalDue.toFixed(2)}`
+                : `Pay $${finalTotal.toFixed(2)}`}
             </button>
           </div>
         </>
