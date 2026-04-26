@@ -287,7 +287,60 @@ export default function ReportsPanel() {
         <span className="reports-filter-hint">Used for date-ranged reports (not X/Z / low stock).</span>
       </div>
 
-      <div className="reports-layout">
+      <div className="reports-buttons reports-toolbar glass-card">
+        <button type="button" className={reportButtonClass('sales-category')} disabled={loading} onClick={() => runReport('sales-category')} title="Sales by Category">
+          Sales Category
+        </button>
+        <button type="button" className={reportButtonClass('top-selling')} disabled={loading} onClick={() => runReport('top-selling')} title="Top Selling Items">
+          Top Items
+        </button>
+        <button type="button" className={reportButtonClass('low-stock')} disabled={loading} onClick={() => runReport('low-stock')}>
+          Low Stock
+        </button>
+        <button type="button" className={reportButtonClass('revenue')} disabled={loading} onClick={() => runReport('revenue')}>
+          Revenue
+        </button>
+        <button type="button" className={reportButtonClass('employee')} disabled={loading} onClick={() => runReport('employee')} title="Employee Summary">
+          Employee
+        </button>
+        <button type="button" className={reportButtonClass('usage')} disabled={loading} onClick={() => runReport('usage')} title="Product Usage">
+          Usage
+        </button>
+        <button type="button" className={reportButtonClass('x-report')} disabled={loading} onClick={() => runReport('x-report')}>
+          X-Report
+        </button>
+        <button type="button" className={reportButtonClass('z-report', 'delete')} disabled={loading} onClick={() => runReport('z-report')} title="Z-Report (close day)">
+          Z-Report
+        </button>
+        <button type="button" className="action-btn add" onClick={() => setShowCustom((s) => !s)} title="Custom Queries">
+          {showCustom ? 'Hide SQL' : 'Custom SQL'}
+        </button>
+      </div>
+
+      <div className={`reports-layout ${showCustom ? 'has-custom' : ''}`}>
+        <div className="reports-main">
+          <div className="reports-center glass-card">
+            <h2 className="reports-chart-title">{reportTitle}</h2>
+            {loading && <p className="reports-loading">Loading…</p>}
+            {chartData && (
+              <div className="reports-chart-wrap">
+                {chartData.type === 'bar' && (
+                  <BarChart
+                    rows={chartData.rows}
+                    labelKey={chartData.labelKey}
+                    valueKey={chartData.valueKey}
+                    labelFormat={chartData.labelFormat}
+                  />
+                )}
+                {chartData.type === 'pie' && (
+                  <PieLegend rows={chartData.rows} labelKey={chartData.labelKey} valueKey={chartData.valueKey} />
+                )}
+              </div>
+            )}
+            <pre className="reports-text-area">{reportText}</pre>
+          </div>
+        </div>
+
         {showCustom && (
           <aside className="reports-custom-sidebar glass-card">
             <h3>Custom Queries</h3>
@@ -327,57 +380,6 @@ export default function ReportsPanel() {
             </div>
           </aside>
         )}
-
-        <div className="reports-main">
-          <div className="reports-buttons">
-            <button type="button" className={reportButtonClass('sales-category')} disabled={loading} onClick={() => runReport('sales-category')}>
-              Sales by Category
-            </button>
-            <button type="button" className={reportButtonClass('top-selling')} disabled={loading} onClick={() => runReport('top-selling')}>
-              Top Selling Items
-            </button>
-            <button type="button" className={reportButtonClass('low-stock')} disabled={loading} onClick={() => runReport('low-stock')}>
-              Low Stock
-            </button>
-            <button type="button" className={reportButtonClass('revenue')} disabled={loading} onClick={() => runReport('revenue')}>
-              Revenue
-            </button>
-            <button type="button" className={reportButtonClass('employee')} disabled={loading} onClick={() => runReport('employee')}>
-              Employee Summary
-            </button>
-            <button type="button" className={reportButtonClass('usage')} disabled={loading} onClick={() => runReport('usage')}>
-              Product Usage
-            </button>
-            <button type="button" className={reportButtonClass('x-report')} disabled={loading} onClick={() => runReport('x-report')}>
-              X-Report
-            </button>
-            <button type="button" className={reportButtonClass('z-report', 'delete')} disabled={loading} onClick={() => runReport('z-report')}>
-              Z-Report (close day)
-            </button>
-            <button type="button" className="action-btn add" onClick={() => setShowCustom((s) => !s)}>
-              {showCustom ? 'Hide' : 'Show'} Custom Queries
-            </button>
-          </div>
-
-          <div className="reports-center glass-card">
-            <h2 className="reports-chart-title">{reportTitle}</h2>
-            {loading && <p className="reports-loading">Loading…</p>}
-            <div className="reports-chart-wrap">
-              {chartData && chartData.type === 'bar' && (
-                <BarChart
-                  rows={chartData.rows}
-                  labelKey={chartData.labelKey}
-                  valueKey={chartData.valueKey}
-                  labelFormat={chartData.labelFormat}
-                />
-              )}
-              {chartData && chartData.type === 'pie' && (
-                <PieLegend rows={chartData.rows} labelKey={chartData.labelKey} valueKey={chartData.valueKey} />
-              )}
-            </div>
-            <pre className="reports-text-area">{reportText}</pre>
-          </div>
-        </div>
       </div>
     </div>
   );
