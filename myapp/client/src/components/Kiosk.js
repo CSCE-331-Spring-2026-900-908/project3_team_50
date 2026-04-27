@@ -430,6 +430,7 @@ export default function Kiosk({
               setCustomTipInput={setCustomTipInput}
               customer={customer}
               pointsToRedeem={pointsToRedeem}
+              setPointsToRedeem={setPointsToRedeem}
               onPay={handleCheckout}
               onBack={() => setView('ITEMS')}
               isProcessing={isProcessing}
@@ -715,11 +716,14 @@ function CheckoutPanel({
   setCustomTipInput,
   customer,
   pointsToRedeem,
+  setPointsToRedeem,
   onPay,
   onBack,
   isProcessing,
 }) {
   const [customerName, setCustomerName] = useState('');
+  const [showPointsInput, setShowPointsInput] = useState(false);
+  const [pointsInput, setPointsInput] = useState('');
 
   const tipPresets = [
     { label: '10%', calc: subtotal * 0.1 },
@@ -731,6 +735,35 @@ function CheckoutPanel({
   const taxAmount = Number((totalAfterDiscount * TAX_RATE).toFixed(2));
   const total = totalAfterDiscount + taxAmount + tip;
 
+  const maxPointsToRedeem = customer ? customer.points : 0;
+  const maxPointsByDiscount = Math.ceil(subtotal) * 10;
+  const effectiveMaxPoints = Math.min(maxPointsToRedeem, maxPointsByDiscount);
+
+  const handleApplyPoints = () => {
+    const points = parseInt(pointsInput, 10);
+    if (isNaN(points) || points < 0) {
+      alert('Please enter a valid number');
+      return;
+    }
+    if (points > effectiveMaxPoints) {
+      alert(`Cannot redeem more than ${effectiveMaxPoints} points`);
+      return;
+    }
+    if (points % 10 !== 0) {
+      alert('Can only redeem in increments of 10 points');
+      return;
+    }
+    const sanitizedPoints = Math.min(Math.max(0, points), effectiveMaxPoints);
+    setPointsToRedeem(sanitizedPoints);
+    setShowPointsInput(false);
+    setPointsInput('');
+  };
+
+  const handleClearPoints = () => {
+    setPointsToRedeem(0);
+    setPointsInput('');
+  };
+
   return (
     <div className="checkout-panel">
       <button className="back-link" onClick={onBack}>
@@ -738,6 +771,66 @@ function CheckoutPanel({
       </button>
 
       <h2 className="checkout-heading">Checkout</h2>
+
+      {customer && customer.points > 0 && (
+        <div className="points-redemption-section" style={{ marginBottom: '24px' }}>
+          <div className="points-header">
+            <h3>Loyalty Points</h3>
+            <span className="available-points">{effectiveMaxPoints} pts available</span>
+          </div>
+
+          {pointsToRedeem === 0 ? (
+            <button
+              className="use-points-btn"
+              onClick={() => setShowPointsInput(true)}
+            >
+              Redeem Points
+            </button>
+          ) : (
+            <div className="points-redeemed">
+              <p className="points-redeemed-text">
+                Redeeming <strong>{pointsToRedeem} points</strong> for <strong>${(pointsToRedeem / 10).toFixed(2)}</strong> off
+              </p>
+              <button
+                className="clear-points"
+                onClick={handleClearPoints}
+              >
+                Remove Points
+              </button>
+            </div>
+          )}
+
+          {showPointsInput && pointsToRedeem === 0 && (
+            <div className="points-input-group">
+              <p className="points-ratio">10 points = $1 off • Max: ${(effectiveMaxPoints / 10).toFixed(0)}</p>
+              <div className="points-controls">
+                <select
+                  value={pointsInput}
+                  onChange={(e) => setPointsInput(e.target.value)}
+                  className="points-select"
+                >
+                  <option value="" disabled>Select amount</option>
+                  {Array.from({ length: Math.floor(effectiveMaxPoints / 10) }, (_, i) => (i + 1) * 10).map((pts) => (
+                    <option key={pts} value={pts}>{pts} pts (${(pts / 10).toFixed(2)})</option>
+                  ))}
+                </select>
+                <button className="points-apply" onClick={handleApplyPoints} disabled={!pointsInput}>
+                  Apply
+                </button>
+                <button
+                  className="points-cancel"
+                  onClick={() => {
+                    setShowPointsInput(false);
+                    setPointsInput('');
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="tip-section">
         <h3>Add a Tip</h3>

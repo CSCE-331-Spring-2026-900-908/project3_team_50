@@ -2147,3 +2147,204 @@
 .kiosk-layout .checkout-panel .pay-btn {
   padding: 13px 16px;
 }
+
+/* ── Points Redemption (Copied from CashierDashboard) ───────────────── */
+.points-section {
+  background: rgba(124,58,237,.05);
+  border: 1px solid rgba(124,58,237,.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.points-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.points-header h3 {
+  margin: 0;
+  font-size: .95rem;
+  font-weight: 600;
+}
+
+.available-points {
+  font-size: .8rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.use-points-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(124,58,237,.3);
+  background: transparent;
+  color: var(--clr-primary);
+  font-weight: 600;
+  font-size: .9rem;
+  transition: all .2s;
+  cursor: pointer;
+}
+
+.use-points-btn:hover {
+  background: rgba(124,58,237,.1);
+  border-color: rgba(124,58,237,.5);
+}
+
+.points-redeemed {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.points-redeemed-text {
+  margin: 0;
+  font-size: .85rem;
+  color: var(--text-primary);
+}
+
+.clear-points {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: .8rem;
+  transition: all .2s;
+}
+
+.clear-points:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--clr-primary);
+  color: var(--text-primary);
+}
+
+.points-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.points-ratio {
+  margin: 0;
+  font-size: .75rem;
+  color: var(--text-secondary);
+}
+
+.points-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.points-controls input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: .85rem;
+  font-family: inherit;
+}
+
+.points-controls input:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+.points-select {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: .85rem;
+  font-family: inherit;
+  cursor: pointer;
+  appearance: none;
+}
+
+.points-select:focus {
+  outline: none;
+  border-color: var(--clr-primary);
+}
+
+.points-select option {
+  background: #ffffff;
+  color: #111111;
+}
+
+.points-apply {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--clr-primary);
+  background: transparent;
+  color: var(--clr-primary);
+  font-weight: 600;
+  font-size: .8rem;
+  transition: all .2s;
+}
+
+.points-apply:hover {
+  background: var(--clr-primary);
+  color: #fff;
+}
+
+.points-cancel {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: .8rem;
+  transition: all .2s;
+}
+
+.points-cancel:hover {
+  border-color: var(--text-primary);
+  color: var(--text-primary);
+}
+
+.points-redemption-section {
+  background: rgba(124,58,237,.05);
+  border: 1px solid rgba(124,58,237,.2);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.points-redemption-section h4 {
+  margin: 0 0 8px;
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.points-info {
+  margin: 0 0 12px;
+  font-size: .8rem;
+  color: var(--text-secondary);
+}
+
+.points-display {
+  display: flex;
+  justify-content: space-between;
+  font-size: .85rem;
+}
+
+.points-label {
+  color: var(--text-secondary);
+}
+
+.points-value {
+  font-weight: 600;
+  color: var(--clr-accent);
+}
+
+.discount-row {
+  color: var(--clr-accent);
+}
